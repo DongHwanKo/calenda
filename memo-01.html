@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>일정표 메모장</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #000;
+        }
+        
+        .header-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 10px auto;
+            width: 95%;
+            max-width: 1400px;
+            position: relative;
+        }
+        
+        .header {
+            background-color: #ffb74d;
+            text-align: center;
+            padding: 5px 20px;
+            border-radius: 25px;
+            flex-grow: 1;
+            position: relative;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            letter-spacing: 10px;
+        }
+        
+        .header-controls {
+            display: flex;
+            gap: 15px;
+            margin-left: 20px;
+        }
+        
+        .wave-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #bbb81b, #00bcd4);
+            opacity: 0.2;
+            z-index: -1;
+        }
+        
+        .main-container {
+            display: flex;
+            max-width: 98%;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+        
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            flex-grow: 1;
+            min-height: 500px;
+        }
+        
+        .grid-item {
+            background-color: #f9f9f9;
+            padding: 10px;
+            min-height: 150px;
+            border-radius: 5px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.16);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: grab;
+        }
+        
+        .grid-item.dragging {
+            opacity: 0.7;
+            cursor: grabbing;
+        }
+        
+        .grid-item.expanded {
+            position: fixed;
+            top: 10%;
+            left: 10%;
+            width: 80%;
+            height: 80%;
+            z-index: 1000;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            overflow: auto;
+        }
+        
+        .yellow { background-color: #fffde7; }
+        .orange { background-color: #fff3e0; }
+        .pink { background-color: #fce4ec; }
+        .blue { background-color: #e3f2fd; }
+        .green { background-color: #e8f5e9; }
+        .purple { background-color: #ede7f6; }
+        .red { background-color: #ffebee; }
+        .teal { background-color: #e0f2f1; }
+        .amber { background-color: #fff8e1; }
+        
+        .memo-keyword-red { background-color: #ef9a9a; }
+        .memo-keyword-orange { background-color: #ffcc80; }
+        .memo-keyword-green { background-color: #a5d6a7; }
+        .memo-keyword-purple { background-color: #b39ddb; }
+        .memo-keyword-blue { background-color: #90caf9; }
+        .memo-keyword-teal { background-color: #80cbc4; }
+        .memo-keyword-amber { background-color: #ffe082; }
+        .memo-keyword-pink { background-color: #f48fb1; }
+        
+        textarea {
+            flex-grow: 1;
+            border: none;
+            background: transparent;
+            resize: none;
+            font-family: inherit;
+            padding: 5px;
+            min-height: 100px;
+            font-size: 18px;
+        }
+        
+        textarea:focus {
+            outline: none;
+        }
+        
+        .datetime-stamp {
+            text-align: right;
+            font-size: 0.8rem;
+            color: #666;
+            margin: 2.5px 0;
+            font-weight: bold;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .time-frame {
+            background-color: rgba(255, 255, 255, 0.5);
+            padding: 1px 4px;
+            border-radius: 4px;
+            flex-shrink: 0;
+            order: 1;
+        }
+        
+        .button-frame {
+            background-color: rgba(255, 255, 255, 0.5);
+            padding: 1px 4px;
+            border-radius: 4px;
+            display: flex;
+            gap: 5px;
+            order: 2;
+        }
+        
+        .button-container {
+            display: flex;
+            gap: 5px;
+            margin: 0;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .utility-buttons {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .delete-btn {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+        
+        .delete-btn:hover {
+            background-color: #d32f2f;
+        }
+        
+        .add-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+        
+        .add-btn:hover {
+            background-color: #388E3C;
+        }
+        
+        .expand-btn {
+            background-color: #9c27b0;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .expand-btn:hover {
+            background-color: #7b1fa2;
+        }
+        
+        .expand-btn i {
+            font-size: 16px;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+        }
+        
+        .close-expand {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1001;
+        }
+
+        .save-btn, .load-btn, .clear-btn {
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 15px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .save-btn {
+            background: linear-gradient(45deg, #2196F3, #03A9F4);
+        }
+
+        .load-btn {
+            background: linear-gradient(45deg, #03A9F4, #00BCD4);
+        }
+
+        .clear-btn {
+            background: linear-gradient(45deg, #f44336, #e53935);
+        }
+
+        .save-btn:hover, .load-btn:hover, .clear-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+        }
+
+        .save-btn:active, .load-btn:active, .clear-btn:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .instruction {
+            text-align: center;
+            color: #ffffff;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .complete-btn {
+            background-color: #673AB7;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+        
+        .complete-btn:hover {
+            background-color: #5E35B1;
+        }
+
+        .complete-time {
+            color: #f44336;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        @media (max-width: 1500px) {
+            .grid-container {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+        
+        @media (max-width: 1200px) {
+            .grid-container {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 900px) {
+            .grid-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .header-container {
+                flex-direction: row;
+                flex-wrap: nowrap;
+                justify-content: space-between;
+                align-items: center;
+            }
+            .header {
+                flex-grow: 0;
+                width: auto;
+                margin-bottom: 0;
+            }
+            .header h1 {
+                font-size: 2rem;
+                letter-spacing: 5px;
+            }
+            .header-controls {
+                margin-left: 10px;
+                margin-bottom: 0;
+                gap: 10px;
+            }
+            .save-btn, .load-btn {
+                padding: 8px 12px;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .grid-container {
+                grid-template-columns: 1fr;
+            }
+            .header-container {
+                flex-direction: row;
+                flex-wrap: nowrap;
+                justify-content: space-between;
+                align-items: center;
+            }
+            .header {
+                width: auto;
+                margin-bottom: 0;
+            }
+            .header-controls {
+                flex-direction: row;
+                gap: 10px;
+                margin-left: 10px;
+                margin-bottom: 0;
+            }
+            .save-btn, .load-btn {
+                width: auto;
+                padding: 8px 12px;
+                font-size: 0.9rem;
+            }
+            .grid-item {
+                min-height: auto; /* 기본 높이 제거 */
+                height: auto; /* 내용에 따라 늘어나게 */
+                padding: 2px;
+            }
+            textarea {
+                min-height: auto;
+                height: auto; /* 줄 수에 따라 동적으로 조정 */
+                font-size: 16px;
+                padding: 2px;
+                overflow: hidden; /* 스크롤바 제거 */
+            }
+            .datetime-stamp {
+                margin: 0;
+                padding: 0;
+                gap: 5px;
+            }
+            .time-frame {
+                padding: 0 2px;
+                font-size: 0.7rem;
+            }
+            .button-frame {
+                padding: 0 2px;
+            }
+            .delete-btn, .add-btn, .complete-btn {
+                padding: 2.75px 5.5px;
+                font-size: 0.44rem;
+            }
+            .expand-btn {
+                width: 15.4px;
+                height: 15.4px;
+                padding: 2.75px;
+                font-size: 0.385rem;
+            }
+            .expand-btn i {
+                font-size: 8.8px;
+            }
+            .complete-time {
+                font-size: 0.7rem;
+                margin-right: 5px;
+            }
+        }
+
+        .custom-confirm {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        
+        .custom-confirm.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .confirm-box {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            width: 80%;
+            max-width: 400px;
+            padding: 20px;
+            text-align: center;
+            transform: translateY(-20px);
+            transition: transform 0.3s;
+        }
+        
+        .custom-confirm.active .confirm-box {
+            transform: translateY(0);
+        }
+        
+        .confirm-message {
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            color: #333;
+        }
+        
+        .confirm-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .confirm-btn {
+            padding: 8px 20px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        
+        .confirm-yes {
+            background-color: #f44336;
+            color: white;
+        }
+        
+        .confirm-yes:hover {
+            background-color: #d32f2f;
+        }
+        
+        .confirm-no {
+            background-color: #9e9e9e;
+            color: white;
+        }
+        
+        .confirm-no:hover {
+            background-color: #757575;
+        }
+    </style>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="wave-bg"></div>
+    
+    <div class="header-container">
+        <div class="header">
+            <h1>M E M O</h1>
+        </div>
+        <div class="header-controls">
+            <button class="save-btn" onclick="saveToFile()">저장</button>
+            <input type="file" id="loadFile" style="display: none;" accept=".txt" onchange="loadFromFile(event)">
+            <button class="load-btn" onclick="document.getElementById('loadFile').click()">불러오기</button>
+            <button class="clear-btn" onclick="clearAllMemos()">전체삭제</button>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="grid-container" id="memo-grid">
+            <!-- 초기 메모 칸은 JavaScript에서 동적으로 생성 -->
+        </div>
+    </div>
+    
+    <div class="overlay" id="overlay"></div>
+    
+    <div class="custom-confirm" id="customConfirm">
+        <div class="confirm-box">
+            <div class="confirm-message" id="confirmMessage"></div>
+            <div class="confirm-buttons">
+                <button class="confirm-btn confirm-yes" id="confirmYes">확인</button>
+                <button class="confirm-btn confirm-no" id="confirmNo">취소</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const colorClasses = ['yellow', 'orange', 'pink', 'blue', 'green', 'purple', 'teal', 'amber'];
+        let memoData = JSON.parse(localStorage.getItem('memoData')) || Array(16).fill().map((_, i) => ({
+            text: '',
+            color: colorClasses[i % colorClasses.length],
+            datetime: '',
+            completeTime: ''
+        }));
+        const MAX_MEMOS = 50;
+        let dragItem = null;
+        let dragStartIndex = null;
+
+        function getCurrentDateTime() {
+            const now = new Date();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            return `${month}-${day} ${hours}:${minutes}`;
+        }
+
+        function initializeMemoGrid() {
+            const gridContainer = document.getElementById('memo-grid');
+            gridContainer.innerHTML = '';
+            memoData.forEach((memo, index) => {
+                const gridItem = document.createElement('div');
+                gridItem.className = `grid-item ${memo.color}`;
+                gridItem.setAttribute('data-index', index);
+                gridItem.setAttribute('draggable', 'true');
+                const dateTimeDiv = document.createElement('div');
+                dateTimeDiv.className = 'datetime-stamp';
+                
+                const timeFrame = document.createElement('div');
+                timeFrame.className = 'time-frame';
+                
+                if (memo.completeTime) {
+                    const completeSpan = document.createElement('span');
+                    completeSpan.className = 'complete-time';
+                    completeSpan.textContent = memo.completeTime;
+                    timeFrame.appendChild(completeSpan);
+                }
+                
+                const timeSpan = document.createElement('span');
+                timeSpan.textContent = memo.datetime || '';
+                timeFrame.appendChild(timeSpan);
+
+                const buttonFrame = document.createElement('div');
+                buttonFrame.className = 'button-frame';
+                buttonFrame.innerHTML = `
+                    <div class="action-buttons">
+                        <button class="complete-btn" tabindex="-1">완료</button>
+                        <button class="add-btn" tabindex="-1">추가</button>
+                        <button class="delete-btn" tabindex="-1">삭제</button>
+                    </div>
+                `;
+
+                dateTimeDiv.appendChild(timeFrame);
+                dateTimeDiv.appendChild(buttonFrame);
+                
+                const textarea = document.createElement('textarea');
+                textarea.className = 'memo-area';
+                textarea.value = memo.text || '';
+                
+                if (memo.text) {
+                    setTimeout(() => {
+                        updateMemoColor(index, memo.text, gridItem);
+                        adjustTextareaHeight(textarea); // 초기 높이 조정
+                    }, 0);
+                }
+                
+                gridItem.appendChild(dateTimeDiv);
+                gridItem.appendChild(textarea);
+                gridContainer.appendChild(gridItem);
+            });
+            setupMemoEvents();
+        }
+
+        function adjustTextareaHeight(textarea) {
+            const isSingleColumn = window.matchMedia('(max-width: 600px)').matches;
+            if (isSingleColumn) {
+                textarea.style.height = 'auto'; // 높이 초기화
+                const lineHeight = parseFloat(getComputedStyle(textarea).lineHeight) || 24; // 줄 높이 계산
+                const lines = textarea.value.split('\n').length || 1; // 줄 수 계산
+                const newHeight = Math.max(lines, 1) * lineHeight + 4; // 최소 1줄 높이 보장, 패딩 고려
+                textarea.style.height = `${newHeight}px`;
+            } else {
+                textarea.style.height = '28px'; // 1열이 아닐 때는 고정 높이 유지
+            }
+        }
+
+        function setupMemoEvents() {
+            document.querySelectorAll('.memo-area').forEach((textarea) => {
+                textarea.replaceWith(textarea.cloneNode(true));
+            });
+            document.querySelectorAll('.delete-btn').forEach((button) => {
+                button.replaceWith(button.cloneNode(true));
+            });
+            document.querySelectorAll('.add-btn').forEach((button) => {
+                button.replaceWith(button.cloneNode(true));
+            });
+            document.querySelectorAll('.complete-btn').forEach((button) => {
+                button.replaceWith(button.cloneNode(true));
+            });
+            document.querySelectorAll('.grid-item').forEach((item) => {
+                item.replaceWith(item.cloneNode(true));
+            });
+
+            document.querySelectorAll('.memo-area').forEach((textarea) => {
+                textarea.addEventListener('focus', function() {
+                    const gridItem = this.closest('.grid-item');
+                    const dataIndex = parseInt(gridItem.getAttribute('data-index'));
+                    const timeSpan = gridItem.querySelector('.time-frame span');
+                    if (!memoData[dataIndex].datetime) {
+                        const currentDateTime = getCurrentDateTime();
+                        memoData[dataIndex].datetime = currentDateTime;
+                        timeSpan.textContent = currentDateTime;
+                        saveToLocalStorage();
+                    }
+                });
+                textarea.addEventListener('input', function() {
+                    const dataIndex = parseInt(this.closest('.grid-item').getAttribute('data-index'));
+                    const gridItem = this.closest('.grid-item');
+                    memoData[dataIndex].text = this.value;
+                    updateMemoColor(dataIndex, this.value, gridItem);
+                    adjustTextareaHeight(this); // 입력 시 높이 조정
+                    saveToLocalStorage();
+                });
+            });
+
+            document.querySelectorAll('.delete-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const gridItem = this.closest('.grid-item');
+                    const index = parseInt(gridItem.getAttribute('data-index'));
+                    showCustomConfirm('이 메모를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.', function() {
+                        const deletedColor = memoData[index].color;
+                        memoData.splice(index, 1);
+                        memoData.push({ text: '', color: deletedColor, datetime: '', completeTime: '' });
+                        saveToLocalStorage();
+                        initializeMemoGrid();
+                    });
+                });
+            });
+
+            document.querySelectorAll('.add-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const gridItem = this.closest('.grid-item');
+                    const index = parseInt(gridItem.getAttribute('data-index'));
+                    const randomColor = colorClasses[Math.floor(Math.random() * colorClasses.length)];
+                    const currentDateTime = getCurrentDateTime();
+                    memoData.splice(index + 1, 0, { text: '', color: randomColor, datetime: currentDateTime, completeTime: '' });
+                    if (memoData.length > MAX_MEMOS) memoData.pop();
+                    saveToLocalStorage();
+                    initializeMemoGrid();
+                });
+            });
+
+            document.querySelectorAll('.complete-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const gridItem = this.closest('.grid-item');
+                    const index = parseInt(gridItem.getAttribute('data-index'));
+                    const currentDateTime = getCurrentDateTime();
+                    memoData[index].completeTime = currentDateTime;
+                    saveToLocalStorage();
+                    initializeMemoGrid();
+                });
+            });
+
+            document.querySelectorAll('.grid-item').forEach(item => {
+                item.addEventListener('dragstart', handleDragStart);
+                item.addEventListener('dragend', handleDragEnd);
+                item.addEventListener('dragover', handleDragOver);
+                item.addEventListener('dragenter', handleDragEnter);
+                item.addEventListener('dragleave', handleDragLeave);
+                item.addEventListener('drop', handleDrop);
+            });
+        }
+
+        function handleDragStart(e) {
+            if (this.classList.contains('expanded')) {
+                e.preventDefault();
+                return;
+            }
+            dragItem = this;
+            dragStartIndex = parseInt(this.getAttribute('data-index'));
+            setTimeout(() => this.classList.add('dragging'), 0);
+            e.dataTransfer.setData('text/plain', '');
+            e.dataTransfer.effectAllowed = 'move';
+        }
+
+        function handleDragEnd() {
+            this.classList.remove('dragging');
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            return false;
+        }
+
+        function handleDragEnter(e) {
+            this.classList.add('drag-over');
+        }
+
+        function handleDragLeave() {
+            this.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            e.stopPropagation();
+            if (dragItem !== this) {
+                const currentIndex = parseInt(this.getAttribute('data-index'));
+                const temp = memoData[dragStartIndex];
+                memoData.splice(dragStartIndex, 1);
+                memoData.splice(currentIndex, 0, temp);
+                saveToLocalStorage();
+                initializeMemoGrid();
+            }
+            this.classList.remove('drag-over');
+            return false;
+        }
+
+        function saveToLocalStorage() {
+            localStorage.setItem('memoData', JSON.stringify(memoData));
+        }
+
+        function saveToFile() {
+            const now = new Date();
+            const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+            const timeStr = `${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`;
+            const defaultFileName = `memo-${dateStr}-${timeStr}.txt`;
+
+            const textContent = memoData
+                .map((memo, index) => {
+                    return `Memo ${index + 1}:\nText: ${memo.text || '(empty)'}\nDateTime: ${memo.datetime || '(not set)'}\nCompleteTime: ${memo.completeTime || '(not completed)'}\nColor: ${memo.color}\n---`;
+                })
+                .join('\n');
+
+            const blob = new Blob([textContent], { type: 'text/plain' });
+
+            if (window.showSaveFilePicker) {
+                (async () => {
+                    try {
+                        const fileHandle = await window.showSaveFilePicker({
+                            suggestedName: defaultFileName,
+                            types: [{
+                                description: 'Text File',
+                                accept: { 'text/plain': ['.txt'] },
+                            }],
+                        });
+                        const writable = await fileHandle.createWritable();
+                        await writable.write(blob);
+                        await writable.close();
+                    } catch (err) {
+                        if (err.name === 'AbortError') {
+                            console.log('사용자가 파일 저장을 취소했습니다.');
+                            return;
+                        }
+                        console.error('파일 저장 중 오류:', err);
+                        fallbackDownload(blob, defaultFileName);
+                    }
+                })();
+            } else {
+                fallbackDownload(blob, defaultFileName);
+            }
+        }
+
+        function fallbackDownload(blob, fileName) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function loadFromFile(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const fileContent = e.target.result;
+                        const loadedData = parseTxtToMemoData(fileContent);
+                        
+                        if (loadedData.length === 0) {
+                            throw new Error('유효한 메모 데이터가 없습니다.');
+                        }
+                        
+                        memoData = loadedData;
+                        if (memoData.length > MAX_MEMOS) memoData = memoData.slice(0, MAX_MEMOS);
+                        saveToLocalStorage();
+                        initializeMemoGrid();
+                    } catch (error) {
+                        alert('파일을 불러오는 중 오류가 발생했습니다: ' + error.message);
+                        initializeDefaultMemos();
+                    }
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        function parseTxtToMemoData(text) {
+            const memos = [];
+            const memoBlocks = text.split('---').map(block => block.trim()).filter(block => block);
+
+            for (const block of memoBlocks) {
+                const lines = block.split('\n').map(line => line.trim());
+                const memo = { text: '', datetime: '', completeTime: '', color: 'yellow' };
+
+                for (const line of lines) {
+                    if (line.startsWith('Text:')) {
+                        memo.text = line.replace('Text:', '').trim().replace('(empty)', '');
+                    } else if (line.startsWith('DateTime:')) {
+                        memo.datetime = line.replace('DateTime:', '').trim().replace('(not set)', '');
+                    } else if (line.startsWith('CompleteTime:')) {
+                        memo.completeTime = line.replace('CompleteTime:', '').trim().replace('(not completed)', '');
+                    } else if (line.startsWith('Color:')) {
+                        memo.color = line.replace('Color:', '').trim();
+                    }
+                }
+
+                if (memo.text || memo.datetime || memo.completeTime) {
+                    memos.push(memo);
+                }
+            }
+
+            return memos;
+        }
+
+        function initializeDefaultMemos() {
+            memoData = Array(16).fill().map((_, i) => ({
+                text: '',
+                color: colorClasses[i % colorClasses.length],
+                datetime: '',
+                completeTime: ''
+            }));
+            saveToLocalStorage();
+            initializeMemoGrid();
+        }
+
+        function clearAllMemos() {
+            showCustomConfirm('모든 메모를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.', function() {
+                memoData = Array(15).fill().map((_, i) => ({
+                    text: '',
+                    color: colorClasses[i % colorClasses.length],
+                    datetime: '',
+                    completeTime: ''
+                }));
+                saveToLocalStorage();
+                initializeMemoGrid();
+            });
+        }
+
+        function updateMemoColor(index, text, gridItem) {
+            colorClasses.forEach(color => {
+                gridItem.classList.remove(color);
+            });
+            
+            const keywords = {
+                '전출': 'memo-keyword-red',
+                '전입': 'memo-keyword-red',
+                '리모델링': 'memo-keyword-green',
+                '헬스': 'memo-keyword-purple',
+                '골프': 'memo-keyword-purple',
+                '중요': 'memo-keyword-orange',
+                '긴급': 'memo-keyword-orange',
+                '회의': 'memo-keyword-blue',
+                '약속': 'memo-keyword-amber',
+                '공지': 'memo-keyword-teal',
+                '이사': 'memo-keyword-red'
+            };
+            
+            let colorClass = memoData[index].color;
+            
+            for (const [keyword, color] of Object.entries(keywords)) {
+                if (text.includes(keyword)) {
+                    colorClass = color;
+                    break;
+                }
+            }
+            
+            gridItem.classList.add(colorClass);
+            memoData[index].color = colorClass;
+        }
+
+        function showCustomConfirm(message, onConfirm) {
+            const customConfirm = document.getElementById('customConfirm');
+            const confirmMessage = document.getElementById('confirmMessage');
+            const confirmYes = document.getElementById('confirmYes');
+            const confirmNo = document.getElementById('confirmNo');
+            
+            confirmMessage.textContent = message;
+            customConfirm.classList.add('active');
+            
+            const newYesBtn = confirmYes.cloneNode(true);
+            const newNoBtn = confirmNo.cloneNode(true);
+            
+            confirmYes.replaceWith(newYesBtn);
+            confirmNo.replaceWith(newNoBtn);
+            
+            newYesBtn.addEventListener('click', function() {
+                customConfirm.classList.remove('active');
+                if (typeof onConfirm === 'function') {
+                    onConfirm();
+                }
+            });
+            
+            newNoBtn.addEventListener('click', function() {
+                customConfirm.classList.remove('active');
+            });
+        }
+
+        window.addEventListener('DOMContentLoaded', initializeMemoGrid);
+        window.addEventListener('resize', () => {
+            document.querySelectorAll('.memo-area').forEach(adjustTextareaHeight);
+        });
+    </script>
+</body>
+</html>

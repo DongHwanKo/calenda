@@ -1,0 +1,1317 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>○♡▣ 일정표 ▣♡○</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+        }
+
+        .container {
+            display: flex;
+            padding: 2px;
+            gap: 10px;
+            min-height: 100vh;
+        }
+
+        /* 캘린더 스타일 */
+        .calendar-section {
+            flex: 2.2;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+        }
+
+.calendar-title {
+    font-size: 30px;
+    font-weight: bold;
+    color: #333;
+    flex-grow: 1;
+    text-align: center;
+}
+        .calendar-day {
+            position: relative;
+            min-height: 140px;
+            border: 1px solid #eee;
+            cursor: pointer;
+            padding: 2px;
+            display: flex;
+            flex-direction: column;
+            font-size: 12px;
+        }
+
+        .calendar-day.day-header {
+            min-height: auto;
+            padding: 5px;
+            text-align: center;
+            font-weight: bold;
+            background-color: #f8f9fa;
+            cursor: default;
+        }
+
+        .calendar-day.empty-day {
+            background-color: #fdfdfd;
+            cursor: default;
+        }
+
+        .date-number {
+            font-weight: bold;
+            font-size: 13px;
+            margin: 0;
+            padding: 1px;
+            line-height: 1;
+            position: relative;
+            z-index: 1;
+        }
+
+        .calendar-day:not(.empty-day):not(.day-header):hover {
+            background-color: #f0f0f0;
+        }
+
+        .today .date-number {
+            color: #007bff;
+            font-weight: bold;
+        }
+
+        .selected {
+            background-color: rgba(255, 255, 0, 0.1) !important; /* 연한 노랑 */
+            border: 1px solid #ffd700; /* 테두리 강조 (선택 사항, 금색 계열) */
+        }
+
+        .selected .date-number {
+            color: #007bff;
+        }
+
+        .memo-preview {
+            font-size: 12px;
+            color: #007bff;
+            margin: 0;
+            padding: 2px;
+            line-height: 1.4;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-height: calc(100% - 20px);
+            position: absolute;
+            top: 18px;
+            left: 2px;
+            right: 2px;
+            bottom: 2px;
+            cursor: pointer;
+            white-space: pre-line;
+            z-index: 1;
+        }
+
+        .calendar-edit-textarea {
+            width: calc(100% - 4px);
+            height: calc(100% - 20px);
+            min-height: 200px;
+            min-width: 200px;
+            border: 1px solid #007bff;
+            box-sizing: border-box;
+            font-size: 14px;
+            line-height: 1.4;
+            resize: none;
+            position: absolute;
+            top: 18px;
+            left: 1px;
+            padding: 2px;
+            background-color: #fff;
+            z-index: 10;
+            display: none;
+            overflow-y: auto;
+        }
+
+        /* 일정 섹션 스타일 */
+        .memo-section {
+            flex: 1.5;
+            display: flex;
+            gap: 10px;
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        .memo-section.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .memo-column {
+            flex: 1;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .memo-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-shrink: 0;
+        }
+
+        .memo-input-container {
+            margin-bottom: 5px;
+            flex-shrink: 0;
+        }
+
+        #importantMemos, #regularMemos {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .memo-textarea {
+            width: 100%;
+            min-height: 60px;
+            padding: 8px 12px;
+            border: 2px solid #4a90e2;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            resize: none;
+            font-family: 'Arial', sans-serif;
+            font-size: 14px;
+            line-height: 1.5;
+            overflow-y: auto;
+            box-sizing: border-box;
+            animation: borderBlink 2s infinite;
+            transition: height 0.1s ease-out;
+        }
+
+        @keyframes borderBlink {
+            0% { border-color: #4a90e2; }
+            50% { border-color: #90c2ff; }
+            100% { border-color: #4a90e2; }
+        }
+
+        .memo-textarea:focus {
+            animation: none;
+            border-color: #2d73d5;
+            outline: none;
+        }
+
+        .memo-content {
+            width: 85%;
+            min-height: 19px;
+            border: none;
+            resize: none;
+            font-family: 'Malgun Gothic', sans-serif;
+            background: transparent;
+            padding: 2px 2px;
+            padding-left: 5px;
+            margin-right: 40px;
+            font-size: 14px;
+            line-height: 1.2;
+            overflow: hidden;
+            box-sizing: border-box;
+            transition: height 0.1s ease-out;
+            word-break: break-word;
+        }
+
+        .memo-content:focus {
+            outline: none;
+            background-color: #fff;
+            overflow-y: auto;
+        }
+
+        /* 키워드별 배경색 추가 */
+        .memo-content.red-bg {
+            background-color: rgba(255, 99, 71, 0.2); /* 연한 빨강 */
+        }
+        .memo-content.orange-bg {
+            background-color: rgba(255, 165, 0, 0.2); /* 연한 주황 */
+        }
+        .memo-content.yellow-bg {
+            background-color: rgba(255, 255, 0, 0.2); /* 연한 노랑 */
+        }
+        .memo-content.green-bg {
+            background-color: rgba(144, 238, 144, 0.2); /* 연한 녹색 */
+        }
+        .memo-content.blue-bg {
+            background-color: rgba(135, 206, 235, 0.2); /* 연한 파랑 */
+        }
+        .memo-content.navy-bg {
+            background-color: rgba(0, 0, 139, 0.2); /* 연한 남색 */
+        }
+        .memo-content.purple-bg {
+            background-color: rgba(147, 112, 219, 0.2); /* 연한 보라 */
+        }
+        .memo-content.gray-bg {
+            background-color: rgba(169, 169, 169, 0.2); /* 연한 회색 */
+        }
+
+        .memo-content.completed {
+            color: #228B22;
+            position: relative;
+            padding-left: 15px;
+        }
+
+        .memo-content.completed::before {
+            content: '';
+            position: absolute;
+            left: 2px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 8px;
+            height: 2px;
+            background-color: #666666;
+        }
+
+        .memo-item {
+            position: relative;
+            border-bottom: 1px solid #a0c4ff;
+            padding-top: 5px;
+            padding-bottom: 5px;
+            margin-bottom: 2px;
+        }
+
+        .memo-buttons {
+            position: absolute;
+            right: 2px;
+            top: 30%;
+            transform: translateY(-50%);
+            display: flex;
+            gap: 3px;
+        }
+
+        .complete-btn, .important-btn, .delete-btn {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            padding: 0;
+            flex-shrink: 0;
+        }
+
+        .complete-btn {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .important-btn {
+            background-color: #ffc107;
+            color: #000;
+        }
+
+        .delete-btn {
+            background-color: #ff4444;
+            color: white;
+        }
+
+        button {
+            padding: 5px 5px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .selected-date-display {
+            color: #007bff;
+            font-weight: bold;
+        }
+
+        .no-date-message {
+            text-align: center;
+            color: #666;
+            margin-top: 20px;
+            font-size: 20px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .memo-header h3 {
+            margin: 0;
+        }
+
+        .calendar-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 0 10px;
+        }
+
+        .calendar-nav {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .calendar-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .today-button {
+            background-color: #28a745;
+        }
+
+        .save-button {
+            background-color: #007bff;
+        }
+
+        .today-button:hover {
+            background-color: #218838;
+        }
+
+        .save-button:hover {
+            background-color: #0056b3;
+        }
+
+        .calendar-actions button {
+            white-space: nowrap;
+        }
+
+        .load-button {
+            background-color: #6c757d;
+        }
+
+        .load-button:hover {
+            background-color: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="calendar-section">
+            <div class="calendar-controls">
+                <div class="calendar-nav">
+                    <button onclick="prevMonth()"><</button>
+                    <h2 id="currentMonth"></h2>
+                    <button onclick="nextMonth()">></button>
+                </div>
+		<div class="calendar-title">▣  일   정   표  ▣</div>
+                <div class="calendar-actions">
+                    <button class="today-button" onclick="goToToday()">오늘</button>
+                    <button class="save-button" onclick="saveAllMemosToFile()">저장</button>
+                    <button class="load-button" onclick="loadMemosFromFile()">불러오기</button>
+                    <input type="file" id="fileInput" accept=".txt" style="display: none;" onchange="handleFileSelect(event)">
+                </div>
+            </div>
+            <div class="calendar-grid" id="calendar"></div>
+        </div>
+
+        <div class="memo-section" id="memoSection">
+            <div class="memo-column">
+                <div class="memo-header">
+                    <div class="header-left">
+                        <h3>하루 일정</h3>
+                        <div class="selected-date-display" id="selectedDateDisplay">
+                            날짜를 선택해주세요
+                        </div>
+                    </div>
+                    <button onclick="addMemo('important')">추가</button>
+                </div>
+                <div class="memo-input-container">
+                    <textarea class="memo-textarea" id="importantMemoInput"
+                        placeholder="하루일정을 입력하세요"></textarea>
+                </div>
+                <div id="importantMemos"></div>
+            </div>
+
+            <div class="memo-column">
+                <div class="memo-header">
+                    <h3>상시 일정</h3>
+                    <button onclick="addMemo('regular')">추가</button>
+                </div>
+                <div class="memo-input-container">
+                    <textarea class="memo-textarea" id="regularMemoInput"
+                        placeholder="계속되는 일정을 입력하세요"></textarea>
+                </div>
+                <div id="regularMemos"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentDate = new Date();
+        let selectedDate = null;
+        let dateMemosStorage = {
+            dates: {},
+            regular: [],
+            previews: {}
+        };
+
+        function getDateKey(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function initCalendar() {
+            const calendar = document.getElementById('calendar');
+            const currentMonthElement = document.getElementById('currentMonth');
+            calendar.innerHTML = '';
+
+            currentMonthElement.textContent = `${currentDate.getFullYear()}년 ${currentDate.getMonth() + 1}월`;
+
+            const days = ['일', '월', '화', '수', '목', '금', '토'];
+            days.forEach(day => {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day day-header';
+                dayElement.textContent = day;
+                calendar.appendChild(dayElement);
+            });
+
+            const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+            const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+
+            for (let i = 0; i < firstDayOfMonth.getDay(); i++) {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day empty-day';
+                calendar.appendChild(dayElement);
+            }
+
+            for (let i = 1; i <= lastDayOfMonth.getDate(); i++) {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                dayElement.dataset.day = i;
+
+                const dateNumber = document.createElement('div');
+                dateNumber.className = 'date-number';
+                dateNumber.textContent = i;
+                dayElement.appendChild(dateNumber);
+
+
+
+                const loopDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), i);
+
+                const today = new Date();
+                if (loopDate.getFullYear() === today.getFullYear() &&
+                    loopDate.getMonth() === today.getMonth() &&
+                    loopDate.getDate() === today.getDate()) {
+                    dayElement.classList.add('today');
+                }
+
+                if (selectedDate &&
+                    loopDate.getFullYear() === selectedDate.getFullYear() &&
+                    loopDate.getMonth() === selectedDate.getMonth() &&
+                    loopDate.getDate() === selectedDate.getDate()) {
+                    dayElement.classList.add('selected');
+                }
+
+                dayElement.onclick = () => selectDate(i);
+                calendar.appendChild(dayElement);
+
+                const dateKey = getDateKey(loopDate);
+                if (dateMemosStorage.previews[dateKey] && dateMemosStorage.previews[dateKey].length > 0) {
+                    const memoPreview = document.createElement('div');
+                    memoPreview.className = 'memo-preview';
+                    memoPreview.dataset.dateKey = dateKey;
+
+                    const firstLines = dateMemosStorage.previews[dateKey].map(memoText => memoText.split('\n')[0]);
+                    memoPreview.textContent = firstLines.join('\n');
+
+                    memoPreview.onclick = (event) => {
+                        event.stopPropagation();
+                        editCalendarPreview(event.target);
+                    };
+                    dayElement.appendChild(memoPreview);
+
+                    const editTextArea = document.createElement('textarea');
+                    editTextArea.className = 'calendar-edit-textarea';
+                    editTextArea.dataset.dateKey = dateKey;
+                    editTextArea.onblur = (event) => saveCalendarPreviewEdit(event.target);
+                    editTextArea.oninput = (event) => adjustTextareaHeightForCalendar(event.target);
+                    dayElement.appendChild(editTextArea);
+                }
+            }
+
+            const totalCells = firstDayOfMonth.getDay() + lastDayOfMonth.getDate();
+            const remainingDays = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+            for (let i = 0; i < remainingDays; i++) {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day empty-day';
+                calendar.appendChild(dayElement);
+            }
+        }
+
+        function selectDate(day) {
+            const editingTextarea = document.querySelector('.calendar-edit-textarea:not([style*="display: none"])');
+            if (editingTextarea) {
+                editingTextarea.blur();
+            }
+
+            const previouslySelectedElement = document.querySelector('.calendar-day.selected');
+            if (previouslySelectedElement) {
+                previouslySelectedElement.classList.remove('selected');
+            }
+
+            selectedDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+
+            const currentDayElement = document.querySelector(`.calendar-day[data-day="${day}"]`);
+            if (currentDayElement) {
+                currentDayElement.classList.add('selected');
+            } else {
+                console.error(`selectDate: 요소를 찾을 수 없음 - data-day ${day}`);
+            }
+
+            document.getElementById('selectedDateDisplay').textContent =
+                `${selectedDate.getFullYear()}년 ${selectedDate.getMonth() + 1}월 ${selectedDate.getDate()}일`;
+            document.getElementById('memoSection').classList.add('active');
+            updateMemoSectionUI();
+            loadMemos();
+        }
+
+        function loadMemos() {
+            const importantMemosContainer = document.getElementById('importantMemos');
+            const regularMemosContainer = document.getElementById('regularMemos');
+
+            importantMemosContainer.innerHTML = '';
+            if (selectedDate) {
+                const dateKey = getDateKey(selectedDate);
+                if (dateMemosStorage.dates[dateKey] && dateMemosStorage.dates[dateKey].important && dateMemosStorage.dates[dateKey].important.length > 0) {
+                    dateMemosStorage.dates[dateKey].important.forEach(memo => {
+                        createMemoElement('important', memo);
+                    });
+                } else {
+                    importantMemosContainer.innerHTML = '<div class="no-date-message">선택한 날짜에 중요 일정가 없습니다.</div>';
+                }
+            } else {
+                importantMemosContainer.innerHTML = '<div class="no-date-message">날짜를 선택하면 중요 일정가 표시됩니다.</div>';
+            }
+
+            regularMemosContainer.innerHTML = '';
+            if (Array.isArray(dateMemosStorage.regular) && dateMemosStorage.regular.length > 0) {
+                dateMemosStorage.regular.forEach(memo => {
+                    createMemoElement('regular', memo);
+                });
+            } else {
+                regularMemosContainer.innerHTML = '<div class="no-date-message">일반 일정가 없습니다.</div>';
+            }
+        }
+
+        function addMemo(type) {
+            const input = document.getElementById(`${type}MemoInput`);
+            const inputValue = input.value.trim();
+            if (inputValue === '') return;
+
+            let containerId = `${type}Memos`;
+            let storageRef;
+            let dateKey;
+
+            if (type === 'important') {
+                if (!selectedDate) {
+                    alert('중요 일정를 위해 날짜를 선택해주세요');
+                    return;
+                }
+                dateKey = getDateKey(selectedDate);
+                if (!dateMemosStorage.dates[dateKey]) {
+                    dateMemosStorage.dates[dateKey] = { important: [] };
+                }
+                storageRef = dateMemosStorage.dates[dateKey].important;
+            } else {
+                if (!Array.isArray(dateMemosStorage.regular)) {
+                    dateMemosStorage.regular = [];
+                }
+                storageRef = dateMemosStorage.regular;
+            }
+
+            storageRef.push(inputValue);
+
+            const container = document.getElementById(containerId);
+            const noMemoMsg = container.querySelector('.no-date-message');
+            if (noMemoMsg) noMemoMsg.remove();
+
+            createMemoElement(type, inputValue);
+            autoSave();
+
+            input.value = '';
+            adjustTextareaHeight(input);
+        }
+
+        function createMemoElement(type, text) {
+            const memosContainer = document.getElementById(`${type}Memos`);
+            const memoItem = document.createElement('div');
+            memoItem.className = 'memo-item';
+
+            const memoContent = document.createElement('textarea');
+            memoContent.className = 'memo-content';
+
+            const isCompleted = text.startsWith('완료: ');
+            memoContent.value = isCompleted ? text.replace(/^완료:\s*/, '') : text;
+
+            let currentTextData = text;
+
+            const keywords = [
+                { word: "이사", class: "orange-bg" },
+                { word: "전출", class: "orange-bg" },
+                { word: "전입", class: "orange-bg" },
+                { word: "리모", class: "orange-bg" },
+                { word: "헬스", class: "green-bg" },
+                { word: "골프", class: "green-bg" },
+                { word: "탁구", class: "green-bg" },
+                { word: "커뮤", class: "green-bg" },
+                { word: "공지", class: "purple-bg" },
+                { word: "공고", class: "purple-bg" },
+                { word: "공문", class: "purple-bg" },
+                { word: "회의", class: "purple-bg" },
+                { word: "누수", class: "navy-bg" },
+                { word: "스위치", class: "navy-bg" },
+                { word: "점검", class: "navy-bg" },
+                { word: "청소", class: "navy-bg" },
+                { word: "콘센트", class: "navy-bg" },
+                { word: "전등", class: "navy-bg" },
+                { word: "에어컨", class: "navy-bg" },
+                { word: "보일러", class: "navy-bg" },
+                { word: "누전", class: "navy-bg" },
+                { word: "화장실", class: "navy-bg" },
+                { word: "거실", class: "navy-bg" },
+                { word: "방", class: "navy-bg" },
+                { word: "주방", class: "navy-bg" },
+                { word: "베란다", class: "navy-bg" },
+                { word: "실외기", class: "navy-bg" },
+                { word: "세탁", class: "navy-bg" },
+                { word: "소장", class: "red-bg" }
+            ];
+
+            keywords.forEach(keyword => {
+                if (text.includes(keyword.word)) {
+                    memoContent.classList.add(keyword.class);
+                }
+            });
+
+            setTimeout(() => adjustTextareaHeight(memoContent), 0);
+
+            memoContent.addEventListener('input', function() {
+                adjustTextareaHeight(this);
+            });
+
+            memoContent.addEventListener('focus', () => adjustTextareaHeight(memoContent));
+            memoContent.addEventListener('blur', () => {
+                const currentUiValue = memoContent.value;
+                let textToSave = isCompleted ? '완료: ' + currentUiValue : currentUiValue;
+
+                if (currentTextData !== textToSave) {
+                    updateMemoContent(type, currentTextData, textToSave);
+                    currentTextData = textToSave;
+
+                    memoContent.classList.remove(...keywords.map(k => k.class));
+                    keywords.forEach(keyword => {
+                        if (textToSave.includes(keyword.word)) {
+                            memoContent.classList.add(keyword.class);
+                        }
+                    });
+                }
+            });
+
+            const buttonContainer = document.createElement('div');
+            buttonContainer.className = 'memo-buttons';
+
+            const completeButton = document.createElement('button');
+            completeButton.className = 'complete-btn';
+            completeButton.title = '완료';
+            completeButton.innerHTML = '✓';
+            completeButton.onclick = () => {
+                const currentUiValue = memoContent.value;
+                const originalTextData = currentTextData;
+                let isNowCompleted = originalTextData.startsWith('완료: ');
+
+                let newTextDataValue;
+                let newUiValue;
+
+                if (!isNowCompleted) {
+                    newTextDataValue = '완료: ' + currentUiValue;
+                    newUiValue = currentUiValue;
+                    memoContent.classList.add('completed');
+                } else {
+                    newTextDataValue = currentUiValue;
+                    newUiValue = newTextDataValue;
+                    memoContent.classList.remove('completed');
+                }
+
+                memoContent.value = newUiValue;
+                updateMemoContent(type, originalTextData, newTextDataValue);
+                currentTextData = newTextDataValue;
+                adjustTextareaHeight(memoContent);
+
+                memoContent.classList.remove(...keywords.map(k => k.class));
+                keywords.forEach(keyword => {
+                    if (newTextDataValue.includes(keyword.word)) {
+                        memoContent.classList.add(keyword.class);
+                    }
+                });
+            };
+
+            const importantButton = document.createElement('button');
+            importantButton.className = 'important-btn';
+            importantButton.title = '달력에 표시/제거';
+            importantButton.innerHTML = '★';
+            importantButton.onclick = () => {
+                const currentUiValue = memoContent.value;
+                const firstLine = currentUiValue.split('\n')[0];
+                const isCompleted = currentTextData.startsWith('완료: ');
+                const textForPreview = isCompleted ? '완료: ' + firstLine : firstLine;
+                toggleMemoInCalendarPreview(textForPreview);
+            };
+
+            const deleteButton = document.createElement('button');
+            deleteButton.className = 'delete-btn';
+            deleteButton.title = '삭제';
+            deleteButton.innerHTML = '×';
+            deleteButton.onclick = () => {
+                const memoTextToDelete = currentTextData;
+                if (type === 'important' && selectedDate) {
+                    removeMemoFromCalendarPreview(memoTextToDelete);
+                }
+                deleteMemoContent(type, memoTextToDelete);
+                memoItem.remove();
+                loadMemos();
+            };
+
+            buttonContainer.appendChild(completeButton);
+            if (type === 'important') {
+                buttonContainer.appendChild(importantButton);
+            }
+            buttonContainer.appendChild(deleteButton);
+
+            memoItem.appendChild(memoContent);
+            memoItem.appendChild(buttonContainer);
+            memosContainer.appendChild(memoItem);
+
+            if (isCompleted) {
+                memoContent.classList.add('completed');
+                setTimeout(() => adjustTextareaHeight(memoContent), 0);
+            }
+        }
+
+        function updateMemoContent(type, oldText, newText) {
+            let updated = false;
+            let dateKey;
+
+            if (type === 'important') {
+                if (!selectedDate) return;
+                dateKey = getDateKey(selectedDate);
+                if (dateMemosStorage.dates[dateKey] && dateMemosStorage.dates[dateKey].important) {
+                    const index = dateMemosStorage.dates[dateKey].important.indexOf(oldText);
+                    if (index > -1) {
+                        dateMemosStorage.dates[dateKey].important[index] = newText;
+                        updated = true;
+                        if (dateMemosStorage.previews[dateKey]) {
+                            const previewIndex = dateMemosStorage.previews[dateKey].indexOf(oldText);
+                            if (previewIndex > -1) {
+                                dateMemosStorage.previews[dateKey][previewIndex] = newText;
+                            }
+                        }
+                    }
+                }
+            } else if (type === 'regular') {
+                if (dateMemosStorage.regular) {
+                    const index = dateMemosStorage.regular.indexOf(oldText);
+                    if (index > -1) {
+                        dateMemosStorage.regular[index] = newText;
+                        updated = true;
+                    }
+                }
+            }
+
+            if (updated) {
+                autoSave();
+            }
+        }
+
+        function deleteMemoContent(type, text) {
+            let deleted = false;
+            if (type === 'important' && selectedDate) {
+                const dateKey = getDateKey(selectedDate);
+                if (dateMemosStorage.dates[dateKey] && dateMemosStorage.dates[dateKey].important) {
+                    const index = dateMemosStorage.dates[dateKey].important.indexOf(text);
+                    if (index > -1) {
+                        dateMemosStorage.dates[dateKey].important.splice(index, 1);
+                        deleted = true;
+                    }
+                }
+            } else if (type === 'regular') {
+                if (dateMemosStorage.regular) {
+                    const index = dateMemosStorage.regular.indexOf(text);
+                    if (index > -1) {
+                        dateMemosStorage.regular.splice(index, 1);
+                        deleted = true;
+                    }
+                }
+            }
+            if (deleted) {
+                autoSave();
+                loadMemos();
+            }
+        }
+
+        function adjustTextareaHeight(textarea) {
+            if (!textarea) return;
+
+            if (textarea.classList.contains('calendar-edit-textarea')) {
+                adjustTextareaHeightForCalendar(textarea);
+                return;
+            }
+
+            const isMemoContent = textarea.classList.contains('memo-content');
+            const lineHeight = 19;
+            const minLines = 1;
+            const maxLines = 5;
+            const minHeight = lineHeight * minLines;
+            const maxHeight = lineHeight * maxLines;
+
+            textarea.style.height = 'auto';
+            const text = textarea.value || textarea.placeholder;
+            const lines = text.split('\n').length;
+            let calculatedHeight = lines * lineHeight;
+
+            if (calculatedHeight < minHeight) {
+                calculatedHeight = minHeight;
+            } else if (calculatedHeight > maxHeight) {
+                calculatedHeight = maxHeight;
+                textarea.style.overflowY = 'auto';
+            } else {
+                textarea.style.overflowY = 'hidden';
+            }
+
+            textarea.style.height = calculatedHeight + 'px';
+        }
+
+        function initTextareaHandlers() {
+            ['important', 'regular'].forEach(type => {
+                const textarea = document.getElementById(`${type}MemoInput`);
+                if (textarea) {
+                    adjustTextareaHeight(textarea);
+                    textarea.addEventListener('input', () => adjustTextareaHeight(textarea));
+                    textarea.addEventListener('paste', () => setTimeout(() => adjustTextareaHeight(textarea), 0));
+                    textarea.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter' && e.ctrlKey) {
+                            e.preventDefault();
+                            addMemo(type);
+                        }
+                    });
+                }
+            });
+        }
+
+        function editCalendarPreview(previewElement) {
+            const dayElement = previewElement.parentElement;
+            const editTextArea = dayElement.querySelector('.calendar-edit-textarea');
+            const dateKey = previewElement.dataset.dateKey;
+
+            if (!editTextArea || !dateKey || !dateMemosStorage.previews[dateKey]) return;
+
+            const otherEditing = document.querySelector('.calendar-edit-textarea:not([style*="display: none"])');
+            if (otherEditing && otherEditing !== editTextArea) {
+                otherEditing.blur();
+            }
+
+            previewElement.style.display = 'none';
+            editTextArea.style.display = 'block';
+            editTextArea.value = dateMemosStorage.previews[dateKey].join('\n');
+
+            adjustTextareaHeightForCalendar(editTextArea);
+            editTextArea.focus();
+            editTextArea.selectionStart = editTextArea.selectionEnd = editTextArea.value.length;
+        }
+
+        function saveCalendarPreviewEdit(textAreaElement) {
+            const dateKey = textAreaElement.dataset.dateKey;
+            const dayElement = textAreaElement.parentElement;
+            const previewElement = dayElement.querySelector('.memo-preview');
+
+            if (!dateKey || !previewElement) {
+                if (textAreaElement) textAreaElement.style.display = 'none';
+                return;
+            }
+
+            const newValue = textAreaElement.value.trim();
+            const newMemoLines = newValue.split('\n').filter(line => line.trim() !== '');
+
+            let changed = false;
+            if (newMemoLines.length > 0) {
+                if (!dateMemosStorage.previews[dateKey] || dateMemosStorage.previews[dateKey].join('\n') !== newMemoLines.join('\n')) {
+                    dateMemosStorage.previews[dateKey] = newMemoLines;
+                    changed = true;
+                }
+            } else {
+                if (dateMemosStorage.previews[dateKey]) {
+                    delete dateMemosStorage.previews[dateKey];
+                    changed = true;
+                }
+            }
+
+            if (changed) {
+                autoSave();
+            }
+
+            textAreaElement.style.display = 'none';
+            if (dateMemosStorage.previews[dateKey]) {
+                const firstLines = dateMemosStorage.previews[dateKey].map(memoText => memoText.split('\n')[0]);
+                previewElement.textContent = firstLines.join('\n');
+                previewElement.style.display = 'block';
+            } else {
+                previewElement.textContent = '';
+                previewElement.style.display = 'none';
+            }
+        }
+
+        function adjustTextareaHeightForCalendar(textarea) {
+            if (!textarea) return;
+            const minHeight = 40;
+            const maxHeight = 100;
+
+            textarea.style.height = 'auto';
+            let scrollHeight = textarea.scrollHeight;
+
+            if (scrollHeight > maxHeight) {
+                textarea.style.height = maxHeight + 'px';
+                textarea.style.overflowY = 'auto';
+            } else {
+                textarea.style.height = Math.max(minHeight, scrollHeight) + 'px';
+                textarea.style.overflowY = 'hidden';
+            }
+        }
+
+        function toggleMemoInCalendarPreview(memoText) {
+            if (!selectedDate) return;
+            const dateKey = getDateKey(selectedDate);
+
+            if (!dateMemosStorage.previews[dateKey]) {
+                dateMemosStorage.previews[dateKey] = [];
+            }
+
+            const index = dateMemosStorage.previews[dateKey].indexOf(memoText);
+
+            if (index === -1) {
+                dateMemosStorage.previews[dateKey].push(memoText);
+            } else {
+                dateMemosStorage.previews[dateKey].splice(index, 1);
+                if (dateMemosStorage.previews[dateKey].length === 0) {
+                    delete dateMemosStorage.previews[dateKey];
+                }
+            }
+            autoSave();
+            initCalendar();
+        }
+
+        function removeMemoFromCalendarPreview(memoText) {
+            if (!selectedDate) return;
+            const dateKey = getDateKey(selectedDate);
+
+            if (dateMemosStorage.previews[dateKey]) {
+                const index = dateMemosStorage.previews[dateKey].indexOf(memoText);
+                if (index > -1) {
+                    dateMemosStorage.previews[dateKey].splice(index, 1);
+                    if (dateMemosStorage.previews[dateKey].length === 0) {
+                        delete dateMemosStorage.previews[dateKey];
+                    }
+                    autoSave();
+                    initCalendar();
+                }
+            }
+        }
+
+        function prevMonth() {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            selectedDate = null;
+            initCalendar();
+            updateMemoSectionUI();
+            loadMemos();
+        }
+
+        function nextMonth() {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            selectedDate = null;
+            initCalendar();
+            updateMemoSectionUI();
+            loadMemos();
+        }
+
+        function goToToday() {
+            currentDate = new Date();
+            selectedDate = new Date();
+            initCalendar();
+            document.getElementById('selectedDateDisplay').textContent =
+                `${selectedDate.getFullYear()}년 ${selectedDate.getMonth() + 1}월 ${selectedDate.getDate()}일`;
+            document.getElementById('memoSection').classList.add('active');
+            updateMemoSectionUI();
+            loadMemos();
+        }
+
+        async function saveAllMemosToFile() {
+            let allContent = "=== 전체 일정 내용 ===\n\n";
+            let hasContent = false;
+
+            allContent += "=== 달력 내용 (미리보기) ===\n";
+            let previewContentAdded = false;
+            const sortedDateKeys = Object.keys(dateMemosStorage.previews).sort();
+            for (const dateKey of sortedDateKeys) {
+                if (dateMemosStorage.previews[dateKey] && dateMemosStorage.previews[dateKey].length > 0) {
+                    const [year, month, day] = dateKey.split('-');
+                    allContent += `[${year}년 ${parseInt(month)}월 ${parseInt(day)}일]\n`;
+                    dateMemosStorage.previews[dateKey].forEach((previewMemo, index) => {
+                        allContent += `${index + 1}. ${previewMemo}\n`;
+                    });
+                    allContent += "\n";
+                    previewContentAdded = true;
+                    hasContent = true;
+                }
+            }
+            if (!previewContentAdded) allContent += "(내용 없음)\n";
+            allContent += "-------------------\n\n";
+
+            allContent += "=== 날짜별 중요 일정 ===\n";
+            let importantContentAdded = false;
+            const sortedImportantDateKeys = Object.keys(dateMemosStorage.dates).sort();
+            for (const dateKey of sortedImportantDateKeys) {
+                const memos = dateMemosStorage.dates[dateKey];
+                if (memos && memos.important && memos.important.length > 0) {
+                    const [year, month, day] = dateKey.split('-');
+                    allContent += `[${year}년 ${parseInt(month)}월 ${parseInt(day)}일]\n`;
+                    memos.important.forEach((memo, index) => {
+                        allContent += `${index + 1}. ${memo}\n`;
+                    });
+                    allContent += "\n";
+                    importantContentAdded = true;
+                    hasContent = true;
+                }
+            }
+            if (!importantContentAdded) allContent += "(내용 없음)\n";
+            allContent += "-------------------\n\n";
+
+            allContent += "=== 일반 일정 ===\n";
+            if (dateMemosStorage.regular && dateMemosStorage.regular.length > 0) {
+                hasContent = true;
+                dateMemosStorage.regular.forEach((memo, index) => {
+                    allContent += `${index + 1}. ${memo}\n`;
+                });
+            } else {
+                allContent += "(내용 없음)\n";
+            }
+            allContent += "\n-------------------\n";
+
+            if (!hasContent) {
+                alert('저장할 일정가 없습니다.');
+                return;
+            }
+
+            try {
+                const today = new Date();
+                const year = today.getFullYear();
+                const month = String(today.getMonth() + 1).padStart(2, '0');
+                const day = String(today.getDate()).padStart(2, '0');
+                const hours = String(today.getHours()).padStart(2, '0');
+                const minutes = String(today.getMinutes()).padStart(2, '0');
+                const seconds = String(today.getSeconds()).padStart(2, '0');
+                const dateTimeString = `${year}${month}${day}_${hours}${minutes}${seconds}`;
+                const defaultFileName = `일정표_동환_${dateTimeString}.txt`;
+
+                if ('showSaveFilePicker' in window) {
+                    const handle = await window.showSaveFilePicker({
+                        suggestedName: defaultFileName,
+                        types: [
+                            {
+                                description: '텍스트 파일',
+                                accept: { 'text/plain': ['.txt'] },
+                            },
+                        ],
+                    });
+                    const writable = await handle.createWritable();
+                    await writable.write(allContent);
+                    await writable.close();
+                    alert('일정표가 성공적으로 저장되었습니다.');
+                } else {
+                    const blob = new Blob([allContent], { type: 'text/plain;charset=utf-8' });
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = defaultFileName;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                    alert(`이 브라우저는 저장 위치 선택을 지원하지 않습니다.\n일정표가 '${defaultFileName}'로 다운로드 폴더에 저장되었습니다.`);
+                }
+            } catch (error) {
+                console.error('파일 저장 중 오류 발생:', error);
+                if (error.name === 'AbortError') {
+                    alert('저장이 취소되었습니다.');
+                } else {
+                    alert('파일 저장 중 오류가 발생했습니다.');
+                }
+            }
+        }
+
+        function autoSave() {
+            try {
+                localStorage.setItem('dateMemosStorage', JSON.stringify(dateMemosStorage));
+                return true;
+            } catch (e) {
+                console.error('자동 저장 중 오류 발생:', e);
+                return false;
+            }
+        }
+
+        function loadSavedMemos() {
+            try {
+                const savedData = localStorage.getItem('dateMemosStorage');
+                if (savedData) {
+                    const parsedData = JSON.parse(savedData);
+                    dateMemosStorage.dates = (parsedData.dates && typeof parsedData.dates === 'object') ? parsedData.dates : {};
+                    dateMemosStorage.regular = Array.isArray(parsedData.regular) ? parsedData.regular : [];
+                    dateMemosStorage.previews = (parsedData.previews && typeof parsedData.previews === 'object') ? parsedData.previews : {};
+                } else {
+                    dateMemosStorage = { dates: {}, regular: [], previews: {} };
+                }
+            } catch (e) {
+                console.error('저장된 일정 불러오기 오류:', e);
+                dateMemosStorage = { dates: {}, regular: [], previews: {} };
+            }
+        }
+
+        function loadMemosFromFile() {
+            if (confirm('파일을 불러오면 현재 모든 일정표 내용이 대체됩니다.\n계속하시겠습니까?')) {
+                document.getElementById('fileInput').click();
+            }
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const content = e.target.result;
+                    parseAndLoadMemos(content);
+                } catch (error) {
+                    console.error('파일 읽기 오류:', error);
+                    alert('파일을 읽는 중 오류가 발생했습니다.');
+                }
+            };
+            reader.readAsText(file, 'UTF-8');
+            event.target.value = '';
+        }
+
+        function parseAndLoadMemos(content) {
+            try {
+                dateMemosStorage = { dates: {}, regular: [], previews: {} };
+                const lines = content.split('\n');
+                let currentSection = null;
+                let currentDateKey = null;
+                let memoCount = 0;
+
+                for (let line of lines) {
+                    line = line.trim();
+                    if (!line || line.startsWith('---')) continue;
+
+                    if (line === "=== 달력 내용 (미리보기) ===") { currentSection = 'calendar'; currentDateKey = null; continue; }
+                    if (line === "=== 날짜별 중요 일정 ===") { currentSection = 'important'; currentDateKey = null; continue; }
+                    if (line === "=== 일반 일정 ===") { currentSection = 'regular'; currentDateKey = null; continue; }
+
+                    const dateMatch = line.match(/\[(\d{4})년\s*(\d{1,2})월\s*(\d{1,2})일\]/);
+                    if (dateMatch) {
+                        const [, year, month, day] = dateMatch;
+                        const date = new Date(year, month - 1, day);
+                        currentDateKey = getDateKey(date);
+                        continue;
+                    }
+
+                    const memoMatch = line.match(/^\d+\.\s*(.+)/s);
+                    if (memoMatch) {
+                        const memoText = memoMatch[1];
+                        memoCount++;
+                        if (currentSection === 'calendar' && currentDateKey) {
+                            if (!dateMemosStorage.previews[currentDateKey]) dateMemosStorage.previews[currentDateKey] = [];
+                            dateMemosStorage.previews[currentDateKey].push(memoText);
+                        } else if (currentSection === 'important' && currentDateKey) {
+                            if (!dateMemosStorage.dates[currentDateKey]) dateMemosStorage.dates[currentDateKey] = { important: [] };
+                            dateMemosStorage.dates[currentDateKey].important.push(memoText);
+                        } else if (currentSection === 'regular') {
+                            dateMemosStorage.regular.push(memoText);
+                        }
+                    } else if (currentSection === 'calendar' && currentDateKey && line !== "(내용 없음)") {
+                        if (!dateMemosStorage.previews[currentDateKey]) dateMemosStorage.previews[currentDateKey] = [];
+                        dateMemosStorage.previews[currentDateKey].push(line);
+                        memoCount++;
+                    }
+                }
+
+                autoSave();
+                initCalendar();
+                updateMemoSectionUI();
+                selectedDate = null;
+                loadMemos();
+
+                document.getElementById('importantMemoInput').value = '';
+                document.getElementById('regularMemoInput').value = '';
+                alert(`파일에서 ${memoCount}개의 일정 항목을 불러왔습니다.`);
+            } catch (error) {
+                console.error('파일 파싱 및 로드 오류:', error);
+                alert('파일 형식이 올바르지 않거나 처리 중 오류가 발생했습니다.');
+                dateMemosStorage = { dates: {}, regular: [], previews: {} };
+                selectedDate = null;
+                initCalendar();
+                loadMemos();
+            }
+        }
+
+        function updateMemoSectionUI() {
+            const memoSection = document.getElementById('memoSection');
+            const importantColumn = memoSection.querySelector('.memo-column:first-child');
+            const regularColumn = memoSection.querySelector('.memo-column:last-child');
+
+            importantColumn.style.opacity = selectedDate ? '1' : '0.3';
+            importantColumn.style.pointerEvents = selectedDate ? 'all' : 'none';
+
+            regularColumn.style.opacity = '1';
+            regularColumn.style.pointerEvents = 'all';
+
+            if (!selectedDate) {
+                document.getElementById('selectedDateDisplay').textContent = '날짜를 선택해주세요';
+            }
+        }
+
+        window.onload = function() {
+            loadSavedMemos();
+            initCalendar();
+            initTextareaHandlers();
+            updateMemoSectionUI();
+            loadMemos();
+            console.log('페이지 로드 완료, 초기 데이터:', JSON.parse(JSON.stringify(dateMemosStorage)));
+        };
+    </script>
+</body>
+</html>
