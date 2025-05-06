@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> ▣ 동환이네 집 ▣ </title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f4f8; /* 산뜻한 연한 배경 */
+            font-family: Arial, sans-serif;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 20px; /* 버튼 간격 */
+            flex-wrap: wrap; /* 화면 작아질 때 줄바꿈 */
+            justify-content: center;
+        }
+
+        .link-button {
+            display: block;
+            width: 200px; /* 버튼 너비 */
+            height: 200px; /* 버튼 높이 */
+            background-color: #4CAF50; /* 기본 배경색 */
+            border-radius: 10px; /* 둥근 모서리 */
+            text-decoration: none;
+            overflow: hidden; /* 이미지 잘림 방지 */
+            transition: all 0.3s ease; /* 부드러운 전환 효과 */
+        }
+
+        .link-button img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* 이미지 비율 유지하며 채우기 */
+        }
+
+        .link-button:hover {
+            transform: scale(1.05); /* 호버 시 살짝 커짐 */
+            background-color: #45a049; /* 호버 시 약간 어두운 색 */
+        }
+
+        /* 반응형 디자인 */
+        @media (max-width: 600px) {
+            .link-button {
+                width: 80px; /* 작은 화면에서 크기 줄임 */
+                height: 80px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="button-container">
+        <a href="https://kdha1004.neocities.org/cal-01" class="link-button">
+            <img src="image/l.png" alt="버튼 1">
+        </a>
+        <a href="https://kdha1004.neocities.org/memo-01" class="link-button">
+            <img src="image/o.png" alt="버튼 2">
+        </a>
+        <a href="https://kdha1004.neocities.org/memo-03" class="link-button">
+            <img src="image/v.png" alt="버튼 3">
+        </a>
+        <a href="https://kdha1004.neocities.org/calendar/login" class="link-button">
+            <img src="image/h.png" alt="버튼 4">
+        </a>
+    </div>
+</body>
+</html>
