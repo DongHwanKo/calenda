@@ -1,0 +1,718 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+}
+
+.container {
+    display: flex;
+    padding: 2px;
+    gap: 10px;
+    min-height: 100vh;
+}
+
+/* 캘린더 스타일 */
+.calendar-section {
+    flex: 2.2;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+}
+
+.calendar-title {
+    font-size: 30px;
+    font-weight: bold;
+    color: #333;
+    flex-grow: 1;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.settings-button {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+    width: 35px;
+    height: 35px;
+    padding: 0;
+    border-radius: 50%;
+    background-color: #f0f0f0;
+    color: #333;
+    transition: all 0.2s;
+}
+
+.settings-button:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+.calendar-day {
+    position: relative;
+    min-height: 140px;
+    border: 1px solid #eee;
+    cursor: pointer;
+    padding: 2px;
+    display: flex;
+    flex-direction: column;
+    font-size: 12px;
+}
+
+.calendar-day.day-header {
+    min-height: auto;
+    padding: 5px;
+    text-align: center;
+    font-weight: bold;
+    background-color: #f8f9fa;
+    cursor: default;
+}
+
+.calendar-day.empty-day {
+    background-color: #fdfdfd;
+    cursor: default;
+}
+
+.date-number {
+    font-weight: bold;
+    font-size: 13px;
+    margin: 0;
+    padding: 1px;
+    line-height: 1;
+    position: relative;
+    z-index: 1;
+}
+
+.calendar-day:not(.empty-day):not(.day-header):hover {
+    background-color: #f0f0f0;
+}
+
+.today .date-number {
+    color: #007bff;
+    font-weight: bold;
+}
+
+.selected {
+    background-color: rgba(255, 255, 0, 0.1) !important; /* 연한 노랑 */
+    border: 1px solid #ffd700; /* 테두리 강조 (선택 사항, 금색 계열) */
+}
+
+.selected .date-number {
+    color: #007bff;
+}
+
+.memo-preview {
+    font-size: 12px;
+    color: #007bff;
+    margin: 0;
+    padding: 2px;
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-height: calc(100% - 20px);
+    position: absolute;
+    top: 18px;
+    left: 2px;
+    right: 2px;
+    bottom: 2px;
+    cursor: pointer;
+    white-space: pre-line;
+    z-index: 1;
+}
+
+/* 키워드 강조 스타일 */
+.keyword-highlight {
+    font-weight: bold;
+    border-radius: 2px;
+    padding: 0 2px;
+}
+
+.calendar-edit-textarea {
+    display: none;
+    width: 200%;
+    height: 200px;
+    min-height: 200px;
+    max-height: 240px;
+    border: none;
+    outline: none;
+    box-shadow: none;
+    border-radius: 4px;
+    padding: 8px;
+    margin-top: 2px;
+    font-size: 16px;
+    resize: none;
+    font-family: inherit;
+    background-color: #ffe3f0;
+    z-index: 100;
+    position: absolute;
+    top: 10px;
+    left: 10%;
+    right: 0;
+    bottom: 0;
+    overflow: visible;
+}
+
+/* 편집 모드일 때 배경을 어둡게 처리 */
+.calendar-day.editing {
+    background-color: rgba(0, 0, 0, 0.03);
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.4);
+    z-index: 10;
+}
+
+/* 클릭 시 약간의 애니메이션 효과 */
+.calendar-day:active {
+    transform: scale(0.98);
+    transition: transform 0.1s;
+}
+
+/* 일정 섹션 스타일 */
+.memo-section {
+    flex: 1.5;
+    display: flex;
+    gap: 10px;
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+.memo-section.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.memo-column {
+    flex: 1;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.memo-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    flex-shrink: 0;
+}
+
+.memo-input-container {
+    margin-bottom: 5px;
+    flex-shrink: 0;
+}
+
+#importantMemos, #regularMemos {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+.memo-textarea {
+    width: 100%;
+    min-height: 60px;
+    padding: 8px 12px;
+    border: 2px solid #4a90e2;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    resize: none;
+    font-family: 'Arial', sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    overflow-y: auto;
+    box-sizing: border-box;
+    animation: borderBlink 2s infinite;
+    transition: height 0.1s ease-out;
+}
+
+@keyframes borderBlink {
+    0% { border-color: #4a90e2; }
+    50% { border-color: #90c2ff; }
+    100% { border-color: #4a90e2; }
+}
+
+.memo-textarea:focus {
+    animation: none;
+    border-color: #2d73d5;
+    outline: none;
+}
+
+.memo-content {
+    width: 85%;
+    min-height: 19px;
+    border: none;
+    resize: none;
+    font-family: 'Malgun Gothic', sans-serif;
+    background: transparent;
+    padding: 2px 2px;
+    padding-left: 5px;
+    margin-right: 40px;
+    font-size: 14px;
+    line-height: 1.2;
+    overflow: hidden;
+    box-sizing: border-box;
+    transition: height 0.1s ease-out;
+    word-break: break-word;
+}
+
+.memo-content:focus {
+    outline: none;
+    background-color: #fff;
+    overflow-y: auto;
+}
+
+/* 키워드별 배경색 추가 */
+.memo-content.red-bg {
+    background-color: rgba(255, 99, 71, 0.2); /* 연한 빨강 */
+}
+.memo-content.orange-bg {
+    background-color: rgba(255, 165, 0, 0.2); /* 연한 주황 */
+}
+.memo-content.yellow-bg {
+    background-color: rgba(255, 255, 0, 0.2); /* 연한 노랑 */
+}
+.memo-content.green-bg {
+    background-color: rgba(144, 238, 144, 0.2); /* 연한 녹색 */
+}
+.memo-content.blue-bg {
+    background-color: rgba(135, 206, 235, 0.2); /* 연한 파랑 */
+}
+.memo-content.navy-bg {
+    background-color: rgba(0, 0, 139, 0.2); /* 연한 남색 */
+}
+.memo-content.purple-bg {
+    background-color: rgba(147, 112, 219, 0.2); /* 연한 보라 */
+}
+.memo-content.gray-bg {
+    background-color: rgba(169, 169, 169, 0.2); /* 연한 회색 */
+}
+
+.memo-content.completed {
+    color: #228B22;
+    position: relative;
+    padding-left: 15px;
+    font-size: 12px;
+}
+
+.memo-content.completed::before {
+    content: '';
+    position: absolute;
+    left: 2px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 8px;
+    height: 2px;
+    background-color: #666666;
+}
+
+.memo-item {
+    position: relative;
+    border-bottom: 1px solid #a0c4ff;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    margin-bottom: 2px;
+}
+
+.memo-buttons {
+    position: absolute;
+    right: 2px;
+    top: 30%;
+    transform: translateY(-50%);
+    display: flex;
+    gap: 3px;
+}
+
+.complete-btn, .important-btn, .delete-btn {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    padding: 0;
+    flex-shrink: 0;
+}
+
+.complete-btn {
+    background-color: #28a745;
+    color: white;
+}
+
+.important-btn {
+    background-color: #ffc107;
+    color: #000;
+}
+
+.delete-btn {
+    background-color: #ff4444;
+    color: white;
+}
+
+button {
+    padding: 5px 5px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 15px;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+.selected-date-display {
+    color: #007bff;
+    font-weight: bold;
+}
+
+.no-date-message {
+    text-align: center;
+    color: #666;
+    margin-top: 20px;
+    font-size: 20px;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.memo-header h3 {
+    margin: 0;
+}
+
+.calendar-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 0 10px;
+}
+
+.calendar-nav {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.calendar-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.today-button {
+    background-color: #28a745;
+}
+
+.save-button {
+    background-color: #007bff;
+}
+
+.today-button:hover {
+    background-color: #218838;
+}
+
+.save-button:hover {
+    background-color: #0056b3;
+}
+
+.calendar-actions button {
+    white-space: nowrap;
+}
+
+.load-button {
+    background-color: #6c757d;
+}
+
+.load-button:hover {
+    background-color: #5a6268;
+}
+
+/* 모달 창 스타일 */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    overflow: auto;
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 500px;
+    max-width: 90%;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    animation: modalOpen 0.3s ease-out;
+}
+
+@keyframes modalOpen {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 20px;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: #333;
+}
+
+.close-modal {
+    font-size: 28px;
+    font-weight: bold;
+    color: #aaa;
+    cursor: pointer;
+}
+
+.close-modal:hover {
+    color: #333;
+}
+
+.modal-body {
+    margin-bottom: 20px;
+}
+
+.modal-body p {
+    margin-bottom: 15px;
+    color: #555;
+}
+
+.keyword-input-container {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.keyword-input-container input {
+    flex-grow: 1;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.keyword-input-container select {
+    width: 100px;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: white;
+}
+
+.keyword-list {
+    max-height: 250px;
+    overflow-y: auto;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    padding: 10px;
+}
+
+.keyword-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px;
+    margin-bottom: 6px;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+}
+
+.keyword-item:last-child {
+    margin-bottom: 0;
+}
+
+.keyword-text {
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+.keyword-color {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.keyword-color.red-bg { background-color: rgba(255, 99, 71, 0.6); }
+.keyword-color.orange-bg { background-color: rgba(255, 165, 0, 0.6); }
+.keyword-color.yellow-bg { background-color: rgba(255, 255, 0, 0.6); }
+.keyword-color.green-bg { background-color: rgba(144, 238, 144, 0.6); }
+.keyword-color.blue-bg { background-color: rgba(135, 206, 235, 0.6); }
+.keyword-color.navy-bg { background-color: rgba(0, 0, 139, 0.6); }
+.keyword-color.purple-bg { background-color: rgba(147, 112, 219, 0.6); }
+.keyword-color.gray-bg { background-color: rgba(169, 169, 169, 0.6); }
+
+.keyword-remove {
+    background-color: #ff4444;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+}
+
+@media screen and (max-width: 768px) {
+    .container {
+        flex-direction: column;
+    }
+
+    .calendar-section {
+        flex: none;
+        width: 100%;
+    }
+
+    .memo-section {
+        flex: none;
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .memo-column {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .calendar-controls {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .calendar-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .calendar-actions button {
+        flex: 1;
+        font-size: 12px;
+        padding: 5px;
+    }
+
+    .calendar-day {
+        min-height: 100px;
+    }
+
+    .memo-textarea {
+        font-size: 12px;
+    }
+
+    .memo-content {
+        font-size: 12px;
+    }
+}
+
+/* 다크 모드 지원 추가 */
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: #1a1a1a;
+        color: #ffffff;
+    }
+
+    .calendar-section,
+    .memo-column {
+        background-color: #2d2d2d;
+        border-color: #404040;
+    }
+
+    .calendar-day {
+        background-color: #2d2d2d;
+        border-color: #404040;
+    }
+
+    .calendar-day.day-header {
+        background-color: #333333;
+    }
+
+    .calendar-day.empty-day {
+        background-color: #2d2d2d;
+    }
+
+    .memo-textarea {
+        background-color: #333333;
+        color: #ffffff;
+        border-color: #404040;
+    }
+
+    .memo-content {
+        color: #ffffff;
+    }
+
+    .memo-item {
+        border-color: #404040;
+    }
+
+    .modal-content {
+        background-color: #2d2d2d;
+        color: #ffffff;
+    }
+
+    .keyword-item {
+        background-color: #333333;
+    }
+
+    .keyword-input-container input,
+    .keyword-input-container select {
+        background-color: #333333;
+        color: #ffffff;
+        border-color: #404040;
+    }
+} 

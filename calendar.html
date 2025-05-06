@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="일정 관리 및 메모 애플리케이션">
+    <meta name="theme-color" content="#007bff">
+    <title>💓 일정표 💓</title>
+    <link rel="stylesheet" href="calendar.css">
+    <!-- Firebase 앱 SDK 직접 추가 -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+</head>
+<body>
+    <div class="container" role="main">
+        <div class="calendar-section" role="region" aria-label="달력">
+            <div class="calendar-controls">
+                <div class="calendar-nav">
+                    <button onclick="prevMonth()" aria-label="이전 달"><</button>
+                    <h2 id="currentMonth" aria-live="polite"></h2>
+                    <button onclick="nextMonth()" aria-label="다음 달">></button>
+                </div>
+                <div class="calendar-title">
+                    ▣  일   정   표  ▣
+                    <button class="settings-button" onclick="openSettingsModal()" aria-label="설정">💖</button>
+                </div>
+                <div class="calendar-actions">
+                    <button class="today-button" onclick="goToToday()" aria-label="오늘로 이동">오늘</button>
+                    <button class="save-button" onclick="saveAllMemosToFile()" aria-label="일정 저장">저장</button>
+                    <button class="load-button" onclick="loadMemosFromFile()" aria-label="일정 불러오기">불러오기</button>
+                    <input type="file" id="fileInput" accept=".txt" style="display: none;" onchange="handleFileSelect(event)" aria-label="파일 선택">
+                </div>
+            </div>
+            <div class="calendar-grid" id="calendar" role="grid" aria-label="달력 그리드"></div>
+        </div>
+
+        <div class="memo-section" id="memoSection" role="region" aria-label="메모 섹션">
+            <div class="memo-column" role="region" aria-label="하루 일정">
+                <div class="memo-header">
+                    <div class="header-left">
+                        <h3>하루 일정</h3>
+                        <div class="selected-date-display" id="selectedDateDisplay" aria-live="polite">
+                            날짜를 선택해주세요
+                        </div>
+                    </div>
+                    <button onclick="addMemo('important')" aria-label="하루 일정 추가">추가</button>
+                </div>
+                <div class="memo-input-container">
+                    <textarea class="memo-textarea" id="importantMemoInput"
+                        placeholder="하루일정을 입력하세요" aria-label="하루 일정 입력"></textarea>
+                </div>
+                <div id="importantMemos" role="list" aria-label="하루 일정 목록"></div>
+            </div>
+
+            <div class="memo-column" role="region" aria-label="상시 일정">
+                <div class="memo-header">
+                    <h3>상시 일정</h3>
+                    <button onclick="addMemo('regular')" aria-label="상시 일정 추가">추가</button>
+                </div>
+                <div class="memo-input-container">
+                    <textarea class="memo-textarea" id="regularMemoInput"
+                        placeholder="계속되는 일정을 입력하세요" aria-label="상시 일정 입력"></textarea>
+                </div>
+                <div id="regularMemos" role="list" aria-label="상시 일정 목록"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 설정 모달 창 -->
+    <div id="settingsModal" class="modal" role="dialog" aria-labelledby="settingsTitle" aria-hidden="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="settingsTitle">단어 설정</h3>
+                <button class="close-modal" onclick="closeSettingsModal()" aria-label="설정 닫기">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>특정 단어가 포함된 메모는 지정된 색상으로 표시됩니다.</p>
+                
+                <div class="keyword-input-container">
+                    <input type="text" id="keywordInput" placeholder="단어 입력" aria-label="키워드 입력">
+                    <select id="colorSelect" aria-label="색상 선택">
+                        <option value="red-bg">빨강</option>
+                        <option value="orange-bg">주황</option>
+                        <option value="yellow-bg">노랑</option>
+                        <option value="green-bg">녹색</option>
+                        <option value="blue-bg">파랑</option>
+                        <option value="navy-bg">남색</option>
+                        <option value="purple-bg">보라</option>
+                        <option value="gray-bg">회색</option>
+                    </select>
+                    <button onclick="addKeyword()" aria-label="키워드 추가">추가</button>
+                </div>
+                
+                <div class="keyword-list" id="keywordList" role="list" aria-label="키워드 목록">
+                    <!-- 키워드 목록이 여기에 동적으로 추가됨 -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button onclick="saveSettings()" aria-label="설정 저장">저장</button>
+                <button onclick="closeSettingsModal()" aria-label="설정 취소">취소</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 메인 애플리케이션 스크립트 -->
+    <script src="calendar.js"></script>
+</body>
+</html> 
