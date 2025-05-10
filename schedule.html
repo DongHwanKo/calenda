@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="일정 관리 애플리케이션 - 개인 및 업무 일정을 효율적으로 관리하세요">
+    <meta name="theme-color" content="#3b82f6">
+    <title>일정 관리</title>
+    <link rel="icon" href="favicon.ico">
+    <link rel="stylesheet" href="schedule.css">
+</head>
+<body>
+    <div class="app">
+        <nav class="sidebar" id="sidebar" role="navigation" aria-label="일정 목록">
+            <div class="sidebar-header">
+                <h2 class="sidebar-title">일정 목록</h2>
+                <div class="sidebar-filter">
+                    <select id="categoryFilter" aria-label="카테고리 필터">
+                        <option value="all">모든 카테고리</option>
+                        <option value="work">업무</option>
+                        <option value="personal">개인</option>
+                        <option value="meeting">회의</option>
+                        <option value="study">학습</option>
+                        <option value="travel">여행</option>
+                        <option value="event">행사</option>
+                        <option value="other">기타</option>
+                    </select>
+                </div>
+            </div>
+            <div class="schedule-list" id="scheduleList" role="list">
+                <!-- 일정 목록이 여기에 동적으로 추가됩니다 -->
+            </div>
+        </nav>
+        
+        <div class="resizer" id="resizer" role="separator" aria-orientation="vertical"></div>
+        
+        <main class="main-content" role="main">
+            <div class="calendar-header-container">
+                <div class="calendar-header">
+                    <div class="calendar-title-area">
+                        <button id="addScheduleBtn" class="action-btn">일정 추가</button>
+                        <h2 class="calendar-title">
+                            <i class="calendar-icon" aria-hidden="true">📅</i>
+                            달력
+                        </h2>
+                    </div>
+                    <div class="calendar-actions">
+                        <button id="sortSchedulesBtn" class="action-btn">정렬하기</button>
+                        <button id="saveSchedulesBtn" class="action-btn">저장</button>
+                        <button id="loadSchedulesBtn" class="action-btn">불러오기</button>
+                        <button id="clearSchedulesBtn" class="action-btn danger-btn">모두 삭제</button>
+                        <input type="file" id="fileInput" accept=".txt" style="display: none;">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="calendar-container">
+                <div class="calendar" id="calendar" role="grid" aria-label="월별 달력">
+                    <!-- 달력이 여기에 동적으로 추가됩니다 -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 일정 추가/수정 모달 -->
+    <div class="modal" id="scheduleModal" role="dialog" aria-labelledby="modalTitle" aria-modal="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">일정 추가</h3>
+                <button type="button" id="deleteScheduleBtn" class="delete-btn">삭제</button>
+            </div>
+            <form id="scheduleForm" role="form">
+                <input type="text" id="scheduleTitle" placeholder="일정명" required aria-label="일정명">
+                <input type="date" id="scheduleStart" required aria-label="시작일">
+                <input type="date" id="scheduleEnd" required aria-label="종료일">
+                
+                <select id="scheduleCategory" aria-label="카테고리">
+                    <option value="work">업무</option>
+                    <option value="personal">개인</option>
+                    <option value="meeting">회의</option>
+                    <option value="study">학습</option>
+                    <option value="travel">여행</option>
+                    <option value="event">행사</option>
+                    <option value="other">기타</option>
+                </select>
+                
+                <select id="scheduleRepeat" aria-label="반복 설정">
+                    <option value="none">반복 안함</option>
+                    <option value="daily">매일</option>
+                    <option value="weekly">매주</option>
+                    <option value="monthly">매월</option>
+                    <option value="yearly">매년</option>
+                </select>
+                
+                <div id="repeatEndDateContainer" style="display: none;">
+                    <label for="scheduleRepeatEndDate">반복 종료일:</label>
+                    <input type="date" id="scheduleRepeatEndDate" aria-label="반복 종료일">
+                </div>
+                
+                <div class="form-row">
+                    <div class="reminder-setting">
+                        <label>
+                            <input type="checkbox" id="scheduleReminder" aria-label="알림 설정">
+                            알림 설정
+                        </label>
+                        <select id="scheduleReminderTime" disabled aria-label="알림 시간">
+                            <option value="15">15분 전</option>
+                            <option value="30">30분 전</option>
+                            <option value="60">1시간 전</option>
+                            <option value="1440">1일 전</option>
+                        </select>
+                    </div>
+                    
+                    <div class="color-setting">
+                        <label for="scheduleColor"></label>
+                        <input type="color" id="scheduleColor" value="#facc15" aria-label="일정 색상">
+                    </div>
+                </div>
+                
+                <textarea id="scheduleDescription" placeholder="설명" aria-label="일정 설명"></textarea>
+                
+                <div class="modal-buttons">
+                    <div class="left-buttons">
+                        <button type="submit" id="saveScheduleBtn">저장</button>
+                        <button type="button" id="cancelScheduleBtn">취소</button>
+                    </div>
+                    <div class="right-buttons"></div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 반복 일정 편집 옵션 모달 -->
+    <div class="modal" id="recurringEditModal" role="dialog" aria-labelledby="recurringEditModalTitle" aria-modal="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="recurringEditModalTitle">반복 일정 편집</h3>
+            </div>
+            <div class="recurring-edit-options">
+                <p>이 일정은 반복 일정입니다. 어떻게 변경하시겠습니까?</p>
+                <div class="option-buttons">
+                    <button type="button" id="editSingleBtn" class="edit-option-btn">
+                        이 일정만 수정
+                        <span class="option-description">이 일정만 변경하고 다른 반복 일정은 변경하지 않습니다.</span>
+                    </button>
+                    <button type="button" id="editFutureBtn" class="edit-option-btn">
+                        이 일정 및 향후 모든 반복 수정
+                        <span class="option-description">이 일정부터 향후 모든 반복 일정을 변경합니다.</span>
+                    </button>
+                    <button type="button" id="editAllBtn" class="edit-option-btn">
+                        모든 반복 일정 수정
+                        <span class="option-description">모든 반복 일정(과거, 현재, 미래)을 변경합니다.</span>
+                    </button>
+                    <button type="button" id="deleteFutureBtn" class="edit-option-btn delete-option-btn">
+                        이 일정부터 모든 반복 삭제
+                        <span class="option-description">이 일정부터 향후 모든 반복 일정을 삭제합니다.</span>
+                    </button>
+                    <button type="button" id="cancelRecurringEditBtn" class="edit-option-btn cancel-btn">취소</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="schedule.js"></script>
+</body>
+</html> 

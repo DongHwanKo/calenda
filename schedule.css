@@ -1,0 +1,1067 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary-color: #3b82f6;
+    --text-color: #333;
+    --bg-color: #ffffff;
+    --border-color: #e5e7eb;
+    --hover-color: #f9fafb;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --text-color: #ffffff;
+        --bg-color: #1a1a1a;
+        --border-color: #4b5563;
+        --hover-color: #2d3748;
+    }
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.5;
+    color: var(--text-color);
+    background-color: var(--bg-color);
+}
+
+.app {
+    display: flex;
+    height: 100vh;
+}
+
+/* 사이드바 스타일 */
+.sidebar {
+    width: 300px;
+    background: white;
+    padding: 1rem;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    height: 100vh; /* 전체 높이 사용 */
+    overflow: hidden; /* 사이드바 전체는 스크롤 없음 */
+}
+
+.sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
+    position: relative;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.sidebar-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+    text-align: left;
+    margin: 0;
+    flex-basis: 35%;
+}
+
+.sidebar-filter {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+}
+
+#categoryFilter {
+    width: 100%;
+    max-width: 150px;
+    padding: 0.375rem 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    background-color: white;
+}
+
+#addScheduleBtn {
+    flex-basis: 30%;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 0.375rem;
+    padding: 0.375rem 0.5rem;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+#addScheduleBtn:hover {
+    background-color: #2563eb;
+}
+
+.schedule-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    overflow-y: auto; /* 리스트만 세로 스크롤 가능 */
+    flex-grow: 1; /* 남은 공간 모두 차지 */
+    padding-right: 0.5rem; /* 스크롤바 공간 확보 */
+}
+
+.schedule-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.list-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+}
+
+.add-btn {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    cursor: pointer;
+    font-size: 0.875rem;
+    transition: background-color 0.2s;
+}
+
+.add-btn:hover {
+    background-color: #2563eb;
+}
+
+.schedule-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    padding: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.schedule-card:hover {
+    background-color: #f9fafb;
+}
+
+.schedule-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.schedule-number {
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: #6b7280;
+    min-width: 1.5rem;
+    text-align: center;
+    background: #f3f4f6;
+    border-radius: 50%;
+    padding: 0.1rem 0.4rem;
+}
+
+.schedule-color {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 0.25rem;
+}
+
+.schedule-title {
+    font-weight: 600;
+    flex-grow: 1;
+}
+
+.schedule-date {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-top: 0.25rem;
+}
+
+.schedule-category {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 0.5rem;
+    padding-left: 0.25rem;
+}
+
+.category-badge {
+    font-size: 0.875rem;
+    letter-spacing: 0.025em;
+    font-weight: 700;
+    padding: 2px 4px;
+    border-radius: 4px;
+    background-color: rgba(0, 0, 0, 0.05);
+    margin-left: auto;
+    text-align: right;
+}
+
+.delete-btn {
+    padding: 0.25rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #6b7280;
+    font-size: 0.75rem;
+    opacity: 0.7;
+    border-radius: 0.25rem;
+}
+
+.delete-btn:hover {
+    color: #ef4444;
+    background-color: rgba(239, 68, 68, 0.1);
+    opacity: 1;
+}
+
+/* 리사이저 스타일 */
+.resizer {
+    width: 4px;
+    background: #e5e7eb;
+    cursor: col-resize;
+}
+
+.resizer:hover {
+    background: #d1d5db;
+}
+
+/* 메인 콘텐츠 스타일 */
+.main-content {
+    flex: 1;
+    padding: 1rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 캘린더 헤더 컨테이너 스타일 */
+.calendar-header-container {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: var(--bg-color);
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* 캘린더 헤더 스타일 */
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.calendar-title-area {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: nowrap;
+    min-width: 300px;
+}
+
+.calendar-title-area #addScheduleBtn {
+    margin-right: 0.5rem;
+    min-width: 100px;
+    padding: 0.5rem 1rem;
+    white-space: nowrap;
+}
+
+.calendar-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin: 0;
+}
+
+.add-schedule-btn {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.add-schedule-btn:hover {
+    background-color: #2563eb;
+}
+
+.calendar-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* 모두 삭제 버튼 스타일 */
+#clearSchedulesBtn {
+    margin-left: 20px;
+}
+
+/* 캘린더 컨테이너 스타일 */
+.calendar-container {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.action-btn {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.action-btn:hover {
+    background-color: #2563eb;
+}
+
+.danger-btn {
+    background-color: #ef4444;
+}
+
+.danger-btn:hover {
+    background-color: #dc2626;
+}
+
+.calendar {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.month-container {
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    background: var(--bg-color);
+    overflow-x: hidden;
+    width: 100%;
+    --days-in-month: 31; /* 기본값 */
+}
+
+.month-title {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.days-grid {
+    display: flex;
+    gap: 0;
+    position: relative;
+    overflow: visible;
+    min-height: 150px;
+    flex-wrap: nowrap;
+    width: 100%;
+}
+
+.day-cell {
+    flex: 0 0 calc(100% / var(--days-in-month));
+    min-height: 100px;
+    border: 0px solid var(--border-color);
+    border-right: 1px solid #e5e7eb;
+    padding: 0;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+}
+
+.day-cell:last-child {
+    border-right: 0;
+}
+
+.day-number {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    z-index: 1;
+    height: 20px;
+    padding-left: 5px;
+    border-bottom: none;
+}
+
+/* 요일 색상 */
+.day-number.sunday {
+    color: #f74141;
+    font-weight: bold;
+}
+
+.day-number.saturday {
+    color: #4185f7;
+    font-weight: bold;
+}
+
+.schedules-container {
+    flex: 1;
+    position: relative;
+    min-height: 22px;
+    overflow: visible;
+    padding-bottom: 4px;
+}
+
+.schedule-line {
+    height: 20px;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    overflow: visible;
+    transition: all 0.2s;
+    position: absolute;
+    left: 0;
+    right: 0;
+    margin: 1px 2px;
+    z-index: 2; /* 기본 z-index */
+    min-width: 50px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    user-select: none; /* 텍스트 선택 방지 */
+}
+
+/* 마우스 오버시 앞으로 나오게 함 */
+.schedule-line:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    z-index: 100 !important; /* 호버 시 최상위로 */
+    cursor: grab; /* 잡을 수 있는 커서로 변경 */
+}
+
+/* 드래그 중인 일정 스타일 */
+.schedule-line.dragging {
+    cursor: grabbing !important; /* 잡은 상태의 커서 */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    transform: scale(1.02);
+    transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.schedule-line-resizer {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    cursor: col-resize;
+    background: transparent;
+    transition: background-color 0.2s;
+}
+
+.schedule-line-resizer:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.schedule-line-resizer.active {
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+.schedule-line-text {
+    text-align: left;
+    display: inline-block;
+    width: 100%;
+    overflow: visible;
+    white-space: nowrap;
+    text-overflow: clip;
+    padding-left: 0.25rem;
+}
+
+/* 모달 스타일 */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+}
+
+.modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    width: 100%;
+    max-width: 500px;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.modal-header h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.modal-content h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+#scheduleForm {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+#scheduleForm input,
+#scheduleForm select,
+#scheduleForm textarea {
+    padding: 0.5rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+}
+
+#scheduleForm textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+/* 모달 폼 레이아웃 */
+.form-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.reminder-setting {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+}
+
+.color-setting {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 50%;
+    align-items: flex-end;
+}
+
+.color-setting label {
+    margin-bottom: 0.25rem;
+    font-weight: 500;
+}
+
+/* 모달 버튼 스타일 */
+.modal-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1rem;
+    align-items: center;
+}
+
+.left-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.center-buttons {
+    display: none;
+}
+
+.right-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+/* 저장 버튼 */
+#saveScheduleBtn {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#saveScheduleBtn:hover {
+    background-color: #2563eb;
+}
+
+/* 취소 버튼 */
+#cancelScheduleBtn {
+    background-color: #e5e7eb;
+    color: #1f2937;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#cancelScheduleBtn:hover {
+    background-color: #d1d5db;
+}
+
+/* 스케줄 색상 선택 */
+#scheduleColor {
+    width: 100%;
+    height: 2.5rem;
+    padding: 0;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    transition: transform 0.1s;
+    max-width: 150px;
+}
+
+#scheduleColor:hover {
+    transform: scale(1.02);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 버튼 스타일 */
+.edit-btn,
+.delete-btn {
+    padding: 0.25rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #6b7280;
+}
+
+.edit-btn:hover,
+.delete-btn:hover {
+    color: #374151;
+}
+
+/* 접근성 개선 */
+button:focus,
+input:focus,
+select:focus,
+textarea:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* 미디어 쿼리 */
+@media (max-width: 768px) {
+    .app {
+        flex-direction: column;
+    }
+    
+    .sidebar {
+        width: 100%;
+        height: auto;
+        max-height: 300px;
+    }
+    
+    .main-content {
+        padding: 0.5rem;
+    }
+    
+    .month-container {
+        margin-bottom: 1rem;
+    }
+    
+    .day-cell {
+        width: 1.2rem;
+        min-height: 4rem;
+    }
+    
+    .schedule-line {
+        width: 150px;
+    }
+    
+    .calendar-title-area {
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        gap: 0.5rem;
+        min-width: auto;
+    }
+    
+    .calendar-title-area #addScheduleBtn {
+        margin-bottom: 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .modal-content {
+        width: 95%;
+        margin: 0.5rem;
+    }
+    
+    .day-cell {
+        width: 1rem;
+        min-height: 3rem;
+    }
+    
+    .schedule-line {
+        width: 100px;
+    }
+}
+
+/* 버튼 공통 스타일 */
+button {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+/* 사이드바 버튼 */
+#addScheduleBtn {
+    background: var(--primary-color);
+    color: white;
+}
+
+#addScheduleBtn:hover {
+    background: #2563eb;
+}
+
+/* 로깅용 스타일 */
+.debug-info {
+    position: absolute;
+    right: 5px;
+    top: 5px;
+    font-size: 9px;
+    color: rgba(0, 0, 0, 0.5);
+    z-index: 5;
+}
+
+.no-results-message {
+    padding: 1rem;
+    text-align: center;
+    color: #6b7280;
+    font-style: italic;
+    border: 1px dashed #e5e7eb;
+    border-radius: 0.5rem;
+    margin: 1rem 0;
+    background-color: #f9fafb;
+}
+
+/* 반복 일정 표시용 스타일만 CSS 파일에 유지 */
+.repeat-icon {
+  display: inline-block;
+  margin-left: 6px;
+  font-size: 12px;
+  color: var(--primary-color);
+  opacity: 0.8;
+}
+
+.schedule-card[data-is-recurring="true"],
+.schedule-card[data-is-recurring-instance="true"] {
+  border-left: 3px solid var(--primary-color);
+}
+
+.repeat-info {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
+  font-style: italic;
+}
+
+/**
+ * 반복 일정 생성 함수 - 향후 1년간만 생성
+ */
+function generateRecurringInstances(originalSchedule) {
+  // 원본 일정의 기간 계산
+  const startDate = new Date(originalSchedule.startDate);
+  const endDate = new Date(originalSchedule.endDate);
+  const duration = endDate.getTime() - startDate.getTime(); // 일정 기간 (밀리초)
+  
+  // 향후 1년 날짜 계산 (오늘부터 1년 후)
+  const oneYearFromNow = new Date();
+  oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
+  
+  // 첫 번째 반복 날짜 계산 (원본 일정 이후의 다음 발생일)
+  let nextDate = getNextOccurrence(startDate, originalSchedule.repeat);
+  
+  // 1년 내의 모든 반복 일정 생성
+  while (nextDate <= oneYearFromNow) {
+    // 반복 일정의 종료일 계산 (기간 유지)
+    const nextEndDate = new Date(nextDate.getTime() + duration);
+    
+    // 새 일정 인스턴스 생성
+    const instance = {
+      ...originalSchedule,
+      id: `${originalSchedule.id}_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+      startDate: formatDateToYYYYMMDD(nextDate),
+      endDate: formatDateToYYYYMMDD(nextEndDate),
+      originalId: originalSchedule.id,
+      isRecurringInstance: true
+    };
+    
+    // 일정 목록에 추가
+    schedules.push(instance);
+    
+    // 다음 반복일 계산
+    nextDate = getNextOccurrence(nextDate, originalSchedule.repeat);
+  }
+  
+  // 원본 일정을 반복 일정 원본으로 표시
+  originalSchedule.isRecurring = true;
+  originalSchedule.hasGeneratedInstances = true;
+}
+
+/**
+ * 다음 반복 발생일 계산
+ */
+function getNextOccurrence(date, repeatType) {
+  const nextDate = new Date(date);
+  
+  switch (repeatType) {
+    case 'daily':
+      nextDate.setDate(nextDate.getDate() + 1);
+      break;
+    case 'weekly':
+      nextDate.setDate(nextDate.getDate() + 7);
+      break;
+    case 'monthly':
+      // 같은 날짜 유지하면서 월 증가
+      const currentDay = nextDate.getDate();
+      nextDate.setMonth(nextDate.getMonth() + 1);
+      
+      // 월말 날짜 처리 (예: 31일 -> 30일)
+      const newMonth = nextDate.getMonth();
+      nextDate.setDate(1);
+      nextDate.setMonth(newMonth + 1);
+      nextDate.setDate(0); // 이전 달의 마지막 날
+      nextDate.setDate(Math.min(currentDay, nextDate.getDate()));
+      break;
+    case 'yearly':
+      nextDate.setFullYear(nextDate.getFullYear() + 1);
+      break;
+  }
+  
+  return nextDate;
+}
+
+// 반복 타입 표시 이름 가져오기
+function getRepeatDisplayName(repeatType) {
+  const names = {
+    'daily': '매일',
+    'weekly': '매주',
+    'monthly': '매월',
+    'yearly': '매년'
+  };
+  return names[repeatType] || '';
+}
+
+function saveSchedule() {
+  try {
+    // 폼 데이터 수집
+    const scheduleData = {
+      id: editingScheduleId || Date.now().toString(),
+      title: document.getElementById('scheduleTitle').value,
+      description: document.getElementById('scheduleDescription').value,
+      startDate: document.getElementById('scheduleStart').value,
+      endDate: document.getElementById('scheduleEnd').value,
+      category: document.getElementById('scheduleCategory').value,
+      color: document.getElementById('scheduleColor').value || getCategoryColor(document.getElementById('scheduleCategory').value),
+      repeat: document.getElementById('scheduleRepeat').value,
+      reminder: document.getElementById('scheduleReminder').checked,
+      reminderTime: document.getElementById('scheduleReminderTime').value,
+      order: editingScheduleId ? schedules.find(s => s.id === editingScheduleId)?.order || 0 : 0
+    };
+
+    validateScheduleData(scheduleData);
+
+    if (editingScheduleId) {
+      // 수정 모드: 기존 일정 수정
+      const index = schedules.findIndex(s => s.id === editingScheduleId);
+      if (index !== -1) {
+        // 반복 설정이 변경되었는지 확인
+        const oldRepeat = schedules[index].repeat;
+        const newRepeat = scheduleData.repeat;
+        
+        // 기존 일정 업데이트
+        schedules[index] = { ...schedules[index], ...scheduleData };
+        
+        // 이 일정이 반복 일정의 원본이고, 반복 설정이 변경되었다면
+        if (oldRepeat !== newRepeat && schedules[index].hasGeneratedInstances) {
+          // 기존에 생성된 반복 인스턴스 삭제
+          schedules = schedules.filter(s => s.originalId !== editingScheduleId);
+          schedules[index].hasGeneratedInstances = false;
+          
+          // 반복 설정이 none이 아니면 새로운 반복 인스턴스 생성
+          if (newRepeat !== 'none') {
+            generateRecurringInstances(schedules[index]);
+          }
+        }
+      }
+    } else {
+      // 추가 모드: 새 일정 추가
+      schedules.push(scheduleData);
+      
+      // 반복 설정이 있으면 반복 인스턴스 생성
+      if (scheduleData.repeat !== 'none') {
+        generateRecurringInstances(scheduleData);
+      }
+    }
+
+    // 변경사항 저장
+    saveSchedules();
+    renderScheduleList();
+    renderCalendar();
+    closeScheduleModal();
+  } catch (error) {
+    showError(error.message);
+  }
+}
+
+function createScheduleCard(schedule, number) {
+  const card = document.createElement('div');
+  card.className = 'schedule-card';
+  card.setAttribute('data-schedule-id', schedule.id);
+  
+  // 반복 일정 속성 추가
+  if (schedule.isRecurring) {
+    card.setAttribute('data-is-recurring', 'true');
+  }
+  if (schedule.isRecurringInstance) {
+    card.setAttribute('data-is-recurring-instance', 'true');
+  }
+  
+  // 더블클릭 이벤트 추가
+  card.addEventListener('dblclick', () => editSchedule(schedule.id));
+  
+  // 카테고리 색상과 이름
+  const categoryColor = schedule.color || getCategoryColor(schedule.category);
+  const categoryName = getCategoryDisplayName(schedule.category);
+  
+  // 반복 아이콘 추가
+  const repeatIcon = (schedule.repeat && schedule.repeat !== 'none') ? 
+    `<span class="repeat-icon" title="${getRepeatDisplayName(schedule.repeat)} 반복">🔄</span>` : '';
+  
+  card.innerHTML = `
+    <div class="schedule-card-header">
+      <div class="schedule-number">${number}</div>
+      <div class="schedule-color" style="background-color: ${categoryColor}"></div>
+      <div class="schedule-title">${schedule.title}${repeatIcon}</div>
+      <button class="delete-btn" onclick="deleteSchedule('${schedule.id}')">삭제</button>
+    </div>
+    <div class="schedule-category">
+      <span class="schedule-date">${formatDate(schedule.startDate)} ~ ${formatDate(schedule.endDate)}</span>
+      <span class="category-badge" style="color: ${categoryColor}; font-weight: bold;">${categoryName}</span>
+    </div>
+  `;
+  return card;
+}
+
+// 문서 로드 완료 후 반복 일정 설명 이벤트 리스너 추가
+document.addEventListener('DOMContentLoaded', function() {
+  // 기존 DOMContentLoaded 이벤트에 추가하거나 이미 있다면 그 안에 포함시키세요
+  document.getElementById('scheduleRepeat').addEventListener('change', function() {
+    const repeatInfo = document.querySelector('.repeat-info') || document.createElement('div');
+    repeatInfo.className = 'repeat-info';
+    
+    if (this.value !== 'none') {
+      repeatInfo.textContent = '* 반복 일정은 앞으로 1년간만 생성됩니다.';
+      if (!repeatInfo.parentNode) {
+        this.parentNode.appendChild(repeatInfo);
+      }
+    } else if (repeatInfo.parentNode) {
+      repeatInfo.parentNode.removeChild(repeatInfo);
+    }
+  });
+});
+
+/* 반복 일정 편집 모달 스타일 */
+.recurring-edit-options {
+    padding: 1rem;
+}
+
+.recurring-edit-options p {
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    text-align: center;
+}
+
+.option-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.edit-option-btn {
+    background: #f3f4f6;
+    color: #1f2937;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.375rem;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+}
+
+.edit-option-btn:hover {
+    background: #e5e7eb;
+    transform: translateY(-1px);
+}
+
+.edit-option-btn.cancel-btn {
+    background: #e5e7eb;
+    margin-top: 0.5rem;
+    text-align: center;
+}
+
+.edit-option-btn.cancel-btn:hover {
+    background: #d1d5db;
+}
+
+.option-description {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-top: 0.25rem;
+}
+
+/* 삭제 버튼 */
+#deleteScheduleBtn {
+    background-color: #ef4444;
+    color: white;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#deleteScheduleBtn:hover {
+    background-color: #dc2626;
+}
+
+.edit-option-btn.delete-option-btn {
+    background-color: #fee2e2;
+    border-color: #fecaca;
+    color: #b91c1c;
+}
+
+.edit-option-btn.delete-option-btn:hover {
+    background-color: #fecaca;
+} 
