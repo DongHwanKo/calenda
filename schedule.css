@@ -349,7 +349,7 @@ body {
     background: var(--bg-color);
     overflow-x: hidden;
     width: 100%;
-    --days-in-month: 31; /* 기본값 */
+    margin-bottom: 0.5rem;
 }
 
 .month-title {
@@ -358,20 +358,18 @@ body {
 }
 
 .days-grid {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
     gap: 0;
     position: relative;
     overflow: visible;
     min-height: 150px;
-    flex-wrap: nowrap;
     width: 100%;
 }
 
 .day-cell {
-    flex: 0 0 calc(100% / var(--days-in-month));
     min-height: 100px;
-    border: 0px solid var(--border-color);
-    border-right: 1px solid #e5e7eb;
+    border: 1px solid var(--border-color);
     padding: 0;
     position: relative;
     display: flex;
@@ -379,8 +377,9 @@ body {
     overflow: visible;
 }
 
-.day-cell:last-child {
-    border-right: 0;
+.day-cell.empty {
+    background-color: var(--hover-color);
+    opacity: 0.5;
 }
 
 .day-number {
@@ -388,19 +387,30 @@ body {
     margin-bottom: 0.5rem;
     z-index: 1;
     height: 20px;
-    padding-left: 5px;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    background-color: var(--bg-color);
     border-bottom: none;
 }
 
-/* 요일 색상 */
-.day-number.sunday {
-    color: #f74141;
-    font-weight: bold;
+.day-number .weekday {
+    font-size: 0.8rem;
+    color: #6b7280;
+    margin-right: 5px;
 }
 
-.day-number.saturday {
-    color: #4185f7;
-    font-weight: bold;
+.day-number .day-num {
+    font-size: 0.9rem;
+}
+
+.day-number .day-num.saturday {
+    color: #3b82f6;
+}
+
+.day-number .day-num.sunday {
+    color: #ef4444;
 }
 
 .schedules-container {
@@ -408,7 +418,8 @@ body {
     position: relative;
     min-height: 22px;
     overflow: visible;
-    padding-bottom: 4px;
+    padding: 4px;
+    margin-top: 4px;
 }
 
 .schedule-line {
@@ -421,30 +432,29 @@ body {
     overflow: visible;
     transition: all 0.2s;
     position: absolute;
-    left: 0;
-    right: 0;
-    margin: 1px 2px;
-    z-index: 2; /* 기본 z-index */
+    left: 4px;
+    right: 4px;
+    margin: 1px 0;
+    z-index: 2;
     min-width: 50px;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    user-select: none; /* 텍스트 선택 방지 */
+    user-select: none;
+    top: 0;
 }
 
-/* 마우스 오버시 앞으로 나오게 함 */
 .schedule-line:hover {
     opacity: 0.9;
     transform: translateY(-1px);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    z-index: 100 !important; /* 호버 시 최상위로 */
-    cursor: grab; /* 잡을 수 있는 커서로 변경 */
+    z-index: 100 !important;
+    cursor: grab;
 }
 
-/* 드래그 중인 일정 스타일 */
 .schedule-line.dragging {
-    cursor: grabbing !important; /* 잡은 상태의 커서 */
+    cursor: grabbing !important;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
     transform: scale(1.02);
     transition: transform 0.1s, box-shadow 0.1s;
@@ -550,6 +560,66 @@ body {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 0.75rem;
+    gap: 1rem;
+}
+
+.form-row.date-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.form-row.date-row label {
+    min-width: 4rem;
+    font-weight: 500;
+}
+
+.form-row.date-row input[type="date"] {
+    width: 8rem;
+    flex: 0 0 auto;
+    padding-right: 2rem;
+    position: relative;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.form-row.date-row input[type="date"]::-webkit-datetime-edit {
+    padding: 0;
+}
+
+.form-row.date-row input[type="date"]::-webkit-calendar-picker-indicator {
+    opacity: 0;
+    width: 2rem;
+    height: 2rem;
+    position: absolute;
+    right: 0;
+    top: 0;
+    cursor: pointer;
+}
+
+.form-row.date-row input[type="date"]::before {
+    content: '📆';
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.2rem;
+    pointer-events: none;
+}
+
+/* 달력 월 이동 화살표 스타일 */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    background: none;
+}
+
+input[type="date"]::-webkit-inner-spin-button,
+input[type="date"]::-webkit-clear-button {
+    display: none;
+}
+
+/* 달력 월 이동 화살표 방향 변경 */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    transform: rotate(90deg);
 }
 
 .reminder-setting {
@@ -561,82 +631,88 @@ body {
 
 .color-setting {
     display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    width: 50%;
-    align-items: flex-end;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 0.5rem;
 }
 
 .color-setting label {
-    margin-bottom: 0.25rem;
     font-weight: 500;
+    color: var(--text-color);
+    min-width: 4rem;
 }
 
 /* 모달 버튼 스타일 */
 .modal-buttons {
     display: flex;
-    justify-content: space-between;
-    margin-top: 1rem;
+    justify-content: center;
     align-items: center;
-}
-
-.left-buttons {
-    display: flex;
-    gap: 10px;
+    margin-top: 1.5rem;
 }
 
 .center-buttons {
-    display: none;
-}
-
-.right-buttons {
     display: flex;
-    gap: 10px;
+    gap: 0.75rem;
 }
 
-/* 저장 버튼 */
 #saveScheduleBtn {
-    background-color: var(--primary-color);
+    background: #3b82f6;
     color: white;
-    padding: 8px 16px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
 }
 
 #saveScheduleBtn:hover {
-    background-color: #2563eb;
+    background: #2563eb;
 }
 
-/* 취소 버튼 */
 #cancelScheduleBtn {
-    background-color: #e5e7eb;
-    color: #1f2937;
-    padding: 8px 16px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
+    background: #e5e7eb;
+    color: #374151;
 }
 
 #cancelScheduleBtn:hover {
-    background-color: #d1d5db;
+    background: #d1d5db;
+}
+
+#deleteScheduleBtn {
+    background: #ef4444;
+    color: white;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+}
+
+#deleteScheduleBtn:hover {
+    background: #dc2626;
 }
 
 /* 스케줄 색상 선택 */
 #scheduleColor {
-    width: 100%;
+    width: 2.5rem;
     height: 2.5rem;
     padding: 0;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--border-color);
     border-radius: 0.375rem;
     cursor: pointer;
-    transition: transform 0.1s;
-    max-width: 150px;
+    flex-shrink: 0;
+}
+
+#scheduleColor::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+
+#scheduleColor::-webkit-color-swatch {
+    border: none;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 #scheduleColor:hover {
-    transform: scale(1.02);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transform: scale(1.05);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#scheduleColor:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
 }
 
 /* 버튼 스타일 */
@@ -739,6 +815,46 @@ button {
 
 #addScheduleBtn:hover {
     background: #2563eb;
+}
+
+/* 모달 버튼 스타일 */
+.modal-buttons {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+}
+
+.right-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+#saveScheduleBtn {
+    background: #3b82f6;
+    color: white;
+}
+
+#saveScheduleBtn:hover {
+    background: #2563eb;
+}
+
+#cancelScheduleBtn {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+#cancelScheduleBtn:hover {
+    background: #d1d5db;
+}
+
+#deleteScheduleBtn {
+    background: #ef4444;
+    color: white;
+}
+
+#deleteScheduleBtn:hover {
+    background: #dc2626;
 }
 
 /* 로깅용 스타일 */
@@ -989,79 +1105,99 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 
-/* 반복 일정 편집 모달 스타일 */
-.recurring-edit-options {
-    padding: 1rem;
-}
-
-.recurring-edit-options p {
-    margin-bottom: 1rem;
-    font-size: 1rem;
-    text-align: center;
-}
-
-.option-buttons {
+.category-setting {
     display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    flex-wrap: nowrap;
 }
 
-.edit-option-btn {
-    background: #f3f4f6;
-    color: #1f2937;
-    border: 1px solid #e5e7eb;
-    border-radius: 0.375rem;
-    padding: 0.75rem 1rem;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background-color 0.2s, transform 0.1s;
-    text-align: left;
+.category-setting label {
+    font-weight: 500;
+    min-width: 4rem;
+    white-space: nowrap;
+}
+
+.category-select-container {
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
 }
 
-.edit-option-btn:hover {
-    background: #e5e7eb;
-    transform: translateY(-1px);
+#scheduleCategory {
+    flex: 1;
+    min-width: 100px;
+    max-width: 200px;
 }
 
-.edit-option-btn.cancel-btn {
-    background: #e5e7eb;
-    margin-top: 0.5rem;
-    text-align: center;
-}
-
-.edit-option-btn.cancel-btn:hover {
-    background: #d1d5db;
-}
-
-.option-description {
+.small-btn {
+    padding: 0.25rem 0.5rem;
     font-size: 0.875rem;
-    color: #6b7280;
-    margin-top: 0.25rem;
-}
-
-/* 삭제 버튼 */
-#deleteScheduleBtn {
-    background-color: #ef4444;
+    background: var(--primary-color);
     color: white;
-    padding: 0.375rem 0.75rem;
-    font-size: 0.875rem;
     border: none;
-    border-radius: 4px;
+    border-radius: 0.25rem;
     cursor: pointer;
+    transition: background-color 0.2s;
+    white-space: nowrap;
 }
 
-#deleteScheduleBtn:hover {
-    background-color: #dc2626;
+.small-btn:hover {
+    background: #2563eb;
 }
 
-.edit-option-btn.delete-option-btn {
-    background-color: #fee2e2;
-    border-color: #fecaca;
-    color: #b91c1c;
+.category-list {
+    max-height: 300px;
+    overflow-y: auto;
+    margin: 1rem 0;
 }
 
-.edit-option-btn.delete-option-btn:hover {
-    background-color: #fecaca;
+.category-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.375rem;
+    margin-bottom: 0.5rem;
+}
+
+.category-item-color {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 0.25rem;
+    border: 1px solid var(--border-color);
+}
+
+.category-item-name {
+    flex-grow: 1;
+}
+
+.category-item-actions {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.add-category-form {
+    display: flex;
+    gap: 0.5rem;
+    margin: 1rem 0;
+}
+
+.add-category-form input[type="text"] {
+    flex-grow: 1;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.375rem;
+}
+
+.add-category-form input[type="color"] {
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+    border: 1px solid var(--border-color);
+    border-radius: 0.375rem;
+    cursor: pointer;
 } 
